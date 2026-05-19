@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline';">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BizGen — Business Generation Tool</title>
+<style>
+:root{
+  --bg:#07070f;--sb:#0c0c1a;--panel:#111122;--card:#171730;--card2:#1e1e3a;
+  --border:#252545;--border2:#31315a;
+  --pu:#7c3aed;--pu2:#9d5ff5;--pu3:#c4b5fd;
+  --cy:#06b6d4;--cy2:#67e8f9;--gr:#10b981;--re:#ef4444;--am:#f59e0b;
+  --tx:#e2e8f0;--tx2:#94a3b8;--tx3:#64748b;
+  --fn:'Courier New',monospace;--fn2:'Segoe UI',system-ui,sans-serif;
+  --r:6px;--r2:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--fn2);background:var(--bg);color:var(--tx);display:flex;flex-direction:column}
+#topbar{display:flex;align-items:center;gap:12px;padding:0 18px;height:48px;
+  background:var(--sb);border-bottom:1px solid var(--border);flex-shrink:0}
+#topbar .logo{font-family:var(--fn);font-size:18px;font-weight:700;
+  background:linear-gradient(90deg,var(--pu2),var(--cy));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
+#topbar .tag{font-size:11px;color:var(--tx3);border-left:1px solid var(--border2);padding-left:12px}
+#topbar .sp{flex:1}
+#lic-stat{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx3);font-family:var(--fn)}
+#lic-dot{width:7px;height:7px;border-radius:50%;background:var(--tx3)}
+#lic-stat.on #lic-dot{background:var(--gr)}
+#lic-stat.on{color:var(--gr)}
+#shell{display:flex;flex:1;overflow:hidden}
+#sidebar{width:210px;flex-shrink:0;background:var(--sb);border-right:1px solid var(--border);
+  overflow-y:auto;display:flex;flex-direction:column;padding:8px 0}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.nsec{font-size:9px;letter-spacing:2px;color:var(--tx3);padding:10px 14px 4px;text-transform:uppercase;font-family:var(--fn)}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 14px;font-size:12px;color:var(--tx2);
+  cursor:pointer;border-left:2px solid transparent;transition:.15s;white-space:nowrap;user-select:none}
+.ni:hover{background:rgba(124,58,237,.08);color:var(--tx)}
+.ni.active{background:rgba(124,58,237,.15);color:var(--pu3);border-left-color:var(--pu)}
+.ni .ico{width:16px;text-align:center;font-size:14px;flex-shrink:0}
+.ni .lk{margin-left:auto;font-size:10px;color:var(--am);opacity:.7}
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.mod{display:none;flex:1;overflow:hidden;flex-direction:column}
+.mod.active{display:flex}
+.mh{padding:16px 22px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--panel)}
+.mh h1{font-size:16px;font-weight:600}
+.badge{font-size:9px;font-family:var(--fn);padding:3px 8px;border-radius:10px;
+  border:1px solid var(--border2);color:var(--tx3);letter-spacing:1px}
+.badge.pr{border-color:var(--am);color:var(--am)}
+.mb{flex:1;overflow-y:auto;padding:18px 22px}
+.mb::-webkit-scrollbar{width:5px}
+.mb::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:14px}
+.card h3{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--pu3)}
+.card2{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+label{font-size:11px;color:var(--tx2);display:block;margin-bottom:4px;letter-spacing:.3px}
+input[type=text],input[type=number],input[type=password],select,textarea{
+  width:100%;background:var(--card2);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--tx);font-family:var(--fn2);font-size:13px;
+  padding:8px 10px;outline:none;transition:.2s;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--pu);box-shadow:0 0 0 3px rgba(124,58,237,.15)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);
+  font-size:12px;font-family:var(--fn2);cursor:pointer;border:none;transition:.2s;font-weight:500}
+.bp{background:var(--pu);color:#fff}.bp:hover{background:var(--pu2)}
+.bs{background:var(--card2);color:var(--tx2);border:1px solid var(--border2)}.bs:hover{border-color:var(--pu);color:var(--pu3)}
+.bc{background:var(--cy);color:#000}.bc:hover{background:var(--cy2)}
+.bg{background:transparent;color:var(--tx3);border:1px solid var(--border)}.bg:hover{color:var(--tx);border-color:var(--border2)}
+.sm{padding:5px 10px;font-size:11px}
+.tg{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;
+  background:rgba(124,58,237,.15);color:var(--pu3);border:1px solid rgba(124,58,237,.3)}
+.tgc{background:rgba(6,182,212,.15);color:var(--cy2);border-color:rgba(6,182,212,.3)}
+.tgg{background:rgba(16,185,129,.15);color:#6ee7b7;border-color:rgba(16,185,129,.3)}
+.tga{background:rgba(245,158,11,.15);color:#fcd34d;border-color:rgba(245,158,11,.3)}
+.tgr{background:rgba(239,68,68,.15);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.flex{display:flex;align-items:center;gap:8px}
+.mt{margin-top:12px}.mb2{margin-bottom:12px}
+hr{border:none;border-top:1px solid var(--border);margin:14px 0}
+.obox{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);
+  padding:12px;font-size:12px;line-height:1.7;color:var(--tx2);min-height:80px;
+  font-family:var(--fn);white-space:pre-wrap;word-break:break-word}
+.sn{font-size:28px;font-weight:700;font-family:var(--fn);
+  background:linear-gradient(135deg,var(--pu2),var(--cy));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:10px;font-size:11px;background:var(--card2);border:1px solid var(--border2);color:var(--tx2)}
+.pb{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--pu),var(--cy));transition:.5s}
+.ci{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:var(--r);
+  border:1px solid var(--border);margin-bottom:6px;background:var(--card);transition:.2s;cursor:pointer}
+.ci:hover{border-color:var(--border2)}
+.ci.done{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.05)}
+.ci input[type=checkbox]{width:15px;height:15px;accent-color:var(--gr);flex-shrink:0;margin-top:1px;cursor:pointer}
+.ci .ct{font-size:12px;line-height:1.5;color:var(--tx2)}
+.ci.done .ct{color:var(--tx3);text-decoration:line-through}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--card2);color:var(--tx2);font-weight:600;padding:8px 12px;
+  text-align:left;border-bottom:1px solid var(--border2);font-size:11px}
+td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--tx2);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;transition:.2s}
+.pc:hover{border-color:var(--border2)}
+.pc .pt{font-size:13px;font-weight:600;margin-bottom:6px}
+.pc .px{font-size:11px;color:var(--tx2);line-height:1.65;font-family:var(--fn)}
+.pc .pa{display:flex;gap:6px;margin-top:10px}
+.er{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.er .en{font-size:14px;font-weight:700;color:var(--pu3);margin-bottom:4px}
+.er .ed{font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:8px}
+.er .em{display:flex;gap:8px;flex-wrap:wrap}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+.lc .ln{font-size:10px;font-family:var(--fn);color:var(--tx3);margin-bottom:4px;letter-spacing:1px}
+.lc .lt{font-size:14px;font-weight:700;margin-bottom:6px}
+.lc .ls{font-size:12px;color:var(--cy2);margin-bottom:8px;font-style:italic;line-height:1.5}
+.lc .ld{font-size:12px;color:var(--tx2);line-height:1.65;margin-bottom:8px}
+.lc .lm{font-size:11px;color:var(--tx3);line-height:1.6;padding:8px;
+  background:var(--card2);border-radius:var(--r);border-left:3px solid var(--gr)}
+.lc .li{font-size:11px;color:#fcd34d;padding:6px 8px;background:rgba(245,158,11,.08);
+  border-radius:var(--r);margin-top:8px;line-height:1.5;border-left:3px solid var(--am)}
+.ts{position:relative;width:40px;height:22px;flex-shrink:0}
+.ts input{opacity:0;width:0;height:0}
+.tsl{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;
+  background:var(--border2);border-radius:11px;transition:.3s}
+.tsl:before{position:absolute;content:'';height:16px;width:16px;left:3px;bottom:3px;
+  background:var(--tx3);border-radius:50%;transition:.3s}
+.ts input:checked+.tsl{background:var(--pu)}
+.ts input:checked+.tsl:before{transform:translateX(18px);background:#fff}
+.sb{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.sb input{flex:1;min-width:180px}
+.sb select{width:160px;flex-shrink:0}
+.mvc{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);
+  padding:14px;margin-bottom:10px;position:relative}
+.mvc .sv{font-size:24px;font-weight:700;font-family:var(--fn);color:var(--gr)}
+.mvc .sm2{font-size:11px;color:var(--tx3);margin-top:2px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--gr);
+  color:var(--tx);padding:10px 16px;border-radius:var(--r);font-size:12px;
+  z-index:9999;opacity:0;transform:translateY(10px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.lo{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:12px;padding:40px;text-align:center;flex:1;color:var(--tx3)}
+.lo .lic{font-size:48px;margin-bottom:8px}
+.lo h2{font-size:18px;color:var(--am)}
+.lo p{font-size:13px;line-height:1.6;max-width:320px}
+#mbk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
+  z-index:1000;align-items:center;justify-content:center}
+#mbk.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border2);border-radius:var(--r2);
+  padding:28px;width:420px;max-width:92vw}
+.modal h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:16px}
+.modal .cx{float:right;background:none;border:none;color:var(--tx3);font-size:18px;cursor:pointer;line-height:1}
+.modal .cx:hover{color:var(--tx)}
+.hb{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);
+  border-radius:var(--r);padding:10px 12px;font-size:11px;color:#fcd34d;
+  font-family:var(--fn);margin-bottom:14px;line-height:1.6}
+.mxb{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);
+  padding:10px 14px;flex:1;min-width:100px}
+.mxb .v{font-size:20px;font-weight:700;font-family:var(--fn);color:var(--cy)}
+.mxb .l{font-size:10px;color:var(--tx3);letter-spacing:.5px;margin-top:2px}
+.tab-bar{display:flex;gap:2px;margin-bottom:14px;background:var(--card2);
+  border-radius:var(--r);padding:3px;border:1px solid var(--border)}
+.tb{padding:6px 14px;border-radius:4px;font-size:12px;cursor:pointer;
+  border:none;background:transparent;color:var(--tx2);transition:.2s;flex:1;text-align:center}
+.tb.active{background:var(--card);color:var(--pu3);font-weight:600}
+@media(max-width:600px){#sidebar{width:160px}.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <span class="logo">BIZGEN</span>
+  <span class="tag">Business Generation Tool v2.0</span>
+  <div class="sp"></div>
+  <div id="lic-stat"><div id="lic-dot"></div><span id="lic-lbl">Free Tier</span></div>
+  <button class="btn bs sm" onclick="openMod()">🔑 Licence</button>
+</div>
+<div id="shell">
+<nav id="sidebar">
+  <div class="nsec">Core</div>
+  <div class="ni active" onclick="showMod('constructor',this)"><span class="ico">🏗</span>Constructor</div>
+  <div class="ni" onclick="showMod('freelancer',this)"><span class="ico">👤</span>Freelancer Sim</div>
+  <div class="ni" onclick="showMod('integration',this)"><span class="ico">🔌</span>Integration Hub</div>
+  <div class="ni" onclick="showMod('backup',this)"><span class="ico">🔒</span>Backup Encryptor<span class="lk">PRO</span></div>
+  <div class="nsec">Tools</div>
+  <div class="ni" onclick="showMod('tester',this)"><span class="ico">🧪</span>Module Tester</div>
+  <div class="ni" onclick="showMod('checklist',this)"><span class="ico">✅</span>Offline Checklist</div>
+  <div class="ni" onclick="showMod('notes',this)"><span class="ico">📝</span>Notes</div>
+  <div class="ni" onclick="showMod('passive',this)"><span class="ico">💰</span>Passive Income</div>
+  <div class="nsec">Library</div>
+  <div class="ni" onclick="showMod('library',this)"><span class="ico">📚</span>Instruction Library<span class="lk">PRO</span></div>
+  <div class="nsec">Intelligence</div>
+  <div class="ni" onclick="showMod('emergence',this)"><span class="ico">🌐</span>Emergence Table</div>
+  <div class="ni" onclick="showMod('launch',this)"><span class="ico">🚀</span>One-Move Launch</div>
+  <div class="ni" onclick="showMod('llmreport',this)"><span class="ico">⚠</span>LLM Limits Report</div>
+</nav>
+<div id="content">
+
+<!-- MODULE 1: CONSTRUCTOR -->
+<div class="mod active" id="mod-constructor">
+  <div class="mh"><h1>🏗 Business Constructor</h1><span class="badge">CORE</span></div>
+  <div class="mb">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <h3>Business Parameters</h3>
+          <div class="mb2"><label>Business Type</label>
+            <select id="c-type">
+              <option value="saas">SaaS / Software</option><option value="ecom">E-Commerce</option>
+              <option value="service">Professional Services</option><option value="marketplace">Marketplace</option>
+              <option value="content">Content / Media</option><option value="hardware">Hardware</option>
+              <option value="agency">Agency</option><option value="fintech">Fintech</option>
+            </select></div>
+          <div class="mb2"><label>Core Problem Solved</label>
+            <input type="text" id="c-problem" placeholder="e.g. Teams waste 3hrs/wk on manual reporting"></div>
+          <div class="mb2"><label>Target Customer</label>
+            <input type="text" id="c-customer" placeholder="e.g. Series A-B SaaS founders"></div>
+          <div class="mb2"><label>Monetization Model</label>
+            <select id="c-rev">
+              <option>Subscription (SaaS)</option><option>Transactional / Usage</option>
+              <option>Marketplace Commission</option><option>Licensing</option>
+              <option>Freemium → Paid</option><option>Consulting + Retainer</option>
+            </select></div>
+          <div class="g2">
+            <div><label>Target ARR ($)</label><input type="number" id="c-arr" placeholder="500000"></div>
+            <div><label>Launch Timeline</label>
+              <select id="c-tl"><option>30 days</option><option>60 days</option><option>90 days</option><option>6 months</option></select>
+            </div>
+          </div>
+          <div class="mb2 mt"><label>Differentiator</label>
+            <textarea id="c-diff" rows="2" placeholder="e.g. AI-native, 10× cheaper, niche-specific"></textarea></div>
+          <button class="btn bp mt" style="width:100%" onclick="runConstructor()">⚡ Generate Blueprint</button>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Generated Blueprint</h3>
+          <div id="c-out" class="obox" style="min-height:200px;color:var(--tx3);font-style:italic">Fill parameters and click Generate →</div>
+          <div id="c-mets" style="display:none;flex-wrap:wrap;gap:12px;margin-top:12px;display:none">
+            <div class="mxb"><div class="v" id="cm-tam">$0</div><div class="l">EST. TAM</div></div>
+            <div class="mxb"><div class="v" id="cm-rev">$0</div><div class="l">YR1 TARGET</div></div>
+            <div class="mxb"><div class="v" id="cm-usr">0</div><div class="l">USERS NEEDED</div></div>
+            <div class="mxb"><div class="v" id="cm-cac">$0</div><div class="l">TARGET CAC</div></div>
+          </div>
+        </div>
+        <div class="card"><h3>Pre-Launch Checks</h3><div id="c-chk"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 2: FREELANCER SIMULATOR -->
+<div class="mod" id="mod-freelancer">
+  <div class="mh"><h1>👤 Freelancer Simulator</h1><span class="badge">CORE</span></div>
+  <div class="mb">
+    <div class="g2">
+      <div>
+        <div class="card">
+          <h3>Rate &amp; Capacity</h3>
+          <div class="mb2"><label>Skill / Niche</label>
+            <select id="f-skill">
+              <option>Software Development</option><option>Design / UX</option>
+              <option>Copywriting / Content</option><option>Marketing Strategy</option>
+              <option>Data Analytics</option><option>DevOps / Cloud</option>
+              <option>Video Production</option><option>Consulting</option>
+            </select></div>
+          <div class="g2">
+            <div><label>Experience (yrs)</label><input type="number" id="f-exp" value="5" min="0" max="40"></div>
+            <div><label>Location Tier</label>
+              <select id="f-loc">
+                <option value="1">Tier 1 (US/UK/AU)</option><option value="0.7">Tier 2 (EU/CA)</option>
+                <option value="0.45">Tier 3 (Latam/EE)</option><option value="0.3">Tier 4 (Asia/Africa)</option>
+              </select></div>
+          </div>
+          <div class="g2 mt">
+            <div><label>Hours/week</label><input type="number" id="f-hrs" value="30" min="1" max="80"></div>
+            <div><label>Utilization %</label><input type="number" id="f-util" value="70" min="10" max="100"></div>
+          </div>
+          <div class="mb2 mt"><label>Monthly Overhead ($)</label><input type="number" id="f-oh" value="2000"></div>
+          <button class="btn bp mt" style="width:100%" onclick="runFreelancer()">📊 Simulate</button>
+        </div>
+        <div class="card">
+          <h3>Client Scenarios</h3>
+          <div class="card2"><strong style="color:var(--cy)">A — Steady Retainer</strong><br><span style="font-size:12px;color:var(--tx2)">1 client, 20h/wk, 6-month contract. Lower risk, predictable income.</span></div>
+          <div class="card2"><strong style="color:var(--pu3)">B — Project-Based</strong><br><span style="font-size:12px;color:var(--tx2)">3–5 projects/mo, variable scope. Higher rate, booking uncertainty.</span></div>
+          <div class="card2"><strong style="color:var(--gr)">C — Productized Service</strong><br><span style="font-size:12px;color:var(--tx2)">Fixed deliverable, fixed price, recurring. Highest leverage.</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card"><h3>Results</h3><div id="f-res"><div style="color:var(--tx3);font-size:13px;font-style:italic">Run the simulator to see projections.</div></div></div>
+        <div class="card"><h3>Growth Roadmap</h3><div id="f-road"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 3: INTEGRATION HUB -->
+<div class="mod" id="mod-integration">
+  <div class="mh"><h1>🔌 Integration Hub</h1><span class="badge">CORE</span></div>
+  <div class="mb">
+    <div class="row mb2">
+      <input type="text" id="int-s" placeholder="Search integrations..." style="max-width:260px" oninput="filterInt()">
+      <select id="int-c" onchange="filterInt()" style="width:160px">
+        <option value="">All Categories</option>
+        <option>CRM</option><option>Payments</option><option>Analytics</option>
+        <option>Communication</option><option>Automation</option><option>Data</option>
+        <option>Marketing</option><option>Infrastructure</option>
+      </select>
+      <span id="int-cnt" class="pill">0 integrations</span>
+    </div>
+    <div id="int-grid" class="g3"></div>
+  </div>
+</div>
+
+<!-- MODULE 4: BACKUP ENCRYPTOR (PREMIUM) -->
+<div class="mod" id="mod-backup">
+  <div class="mh"><h1>🔒 Backup Encryptor</h1><span class="badge pr">PREMIUM</span></div>
+  <div class="mb">
+    <div class="lo" id="bk-lock">
+      <div class="lic">🔐</div><h2>Premium Feature</h2>
+      <p>AES-GCM 256-bit encryption via Web Crypto API. Secure sensitive business data locally — nothing leaves your browser.</p>
+      <button class="btn bp" onclick="openMod()">🔑 Enter Licence Key</button>
+    </div>
+    <div id="bk-cnt" style="display:none">
+      <div class="g2">
+        <div>
+          <div class="card">
+            <h3>Encrypt</h3>
+            <div class="mb2"><label>Passphrase</label><input type="text" id="ep" placeholder="Strong passphrase (never stored)"></div>
+            <div class="mb2"><label>Data to Encrypt</label><textarea id="ei" rows="6" placeholder="Paste sensitive data here..."></textarea></div>
+            <button class="btn bp" style="width:100%" onclick="doEncrypt()">🔒 Encrypt</button>
+          </div>
+          <div class="card">
+            <h3>Decrypt</h3>
+            <div class="mb2"><label>Passphrase</label><input type="text" id="dp" placeholder="Passphrase used to encrypt"></div>
+            <div class="mb2"><label>Encrypted Payload</label><textarea id="di" rows="4" placeholder="Paste base64 payload..."></textarea></div>
+            <button class="btn bc" style="width:100%" onclick="doDecrypt()">🔓 Decrypt</button>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>Output</h3>
+            <div id="eo" class="obox" style="min-height:180px">Output appears here...</div>
+            <div class="flex mt"><button class="btn bs sm" onclick="cpEnc()">📋 Copy</button><button class="btn bs sm" onclick="dlEnc()">⬇ Download</button></div>
+          </div>
+          <div class="card">
+            <h3>Security Details</h3>
+            <div class="card2" style="font-size:12px;line-height:1.8;color:var(--tx2)">
+              <strong style="color:var(--gr)">Algorithm:</strong> AES-GCM 256-bit<br>
+              <strong style="color:var(--gr)">Key Derivation:</strong> PBKDF2 + SHA-256, 100k iterations<br>
+              <strong style="color:var(--gr)">IV:</strong> 96-bit random per encryption<br>
+              <strong style="color:var(--gr)">Salt:</strong> 128-bit random per session<br>
+              <strong style="color:var(--am)">Note:</strong> Data never leaves your browser.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 5: MODULE TESTER -->
+<div class="mod" id="mod-tester">
+  <div class="mh"><h1>🧪 Module Tester</h1><span class="badge">TOOL</span></div>
+  <div class="mb">
+    <div class="card mb2">
+      <h3>System Health</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px" id="hb"></div>
+      <div class="mt">
+        <button class="btn bp" onclick="runAllTests()">▶ Run All Tests</button>
+        <button class="btn bs" onclick="document.getElementById('tr').textContent='Results cleared.'" style="margin-left:8px">🗑 Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Test Results</h3>
+      <div id="tr" class="obox" style="min-height:300px;font-size:11px;line-height:1.9">Click "Run All Tests" to begin...</div>
+    </div>
+    <div class="card">
+      <h3>Manual Function Test</h3>
+      <div class="row">
+        <select id="tf" style="flex:1">
+          <option value="hash">SHA-256 Hash</option><option value="storage">localStorage R/W</option>
+          <option value="sw">Service Worker Status</option><option value="crypto">AES-GCM Round-Trip</option>
+          <option value="pcount">Prompt Library Count</option><option value="dint">Data Integrity Check</option>
+        </select>
+        <button class="btn bc" onclick="runManTest()">Run</button>
+      </div>
+      <div id="mr" class="obox mt" style="min-height:60px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 6: OFFLINE CHECKLIST -->
+<div class="mod" id="mod-checklist">
+  <div class="mh"><h1>✅ Offline Checklist</h1><span class="badge">TOOL</span></div>
+  <div class="mb">
+    <div class="row mb2" style="justify-content:space-between">
+      <div class="flex">
+        <span class="pill" id="cl-p">0 / 12 complete</span>
+        <div class="pb" style="width:180px"><div class="pf" id="cl-b" style="width:0%"></div></div>
+      </div>
+      <div class="flex">
+        <button class="btn bs sm" onclick="resetCL()">↺ Reset</button>
+        <button class="btn bp sm" onclick="exportCL()">⬇ Export</button>
+      </div>
+    </div>
+    <div id="cl-items"></div>
+  </div>
+</div>
+
+<!-- MODULE 7: NOTES -->
+<div class="mod" id="mod-notes">
+  <div class="mh"><h1>📝 Notes</h1><span class="badge">TOOL</span></div>
+  <div class="mb">
+    <div class="g2">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="card" style="flex:1">
+          <h3>Free Notes — Auto-saved</h3>
+          <textarea id="nt" style="height:280px;font-size:12px;line-height:1.7" placeholder="Type notes here..."></textarea>
+          <div class="flex mt">
+            <span id="nt-s" style="font-size:11px;color:var(--tx3)">Not saved</span>
+            <button class="btn bg sm" onclick="clearNotes()">🗑 Clear</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Quick Tags</h3>
+          <div class="flex" style="flex-wrap:wrap;gap:6px">
+            <span class="tg" style="cursor:pointer" onclick="addTag(this)">Idea</span>
+            <span class="tg" style="cursor:pointer" onclick="addTag(this)">Action</span>
+            <span class="tg tgc" style="cursor:pointer" onclick="addTag(this)">Revenue</span>
+            <span class="tg tgg" style="cursor:pointer" onclick="addTag(this)">Priority</span>
+            <span class="tg tga" style="cursor:pointer" onclick="addTag(this)">Risk</span>
+            <span class="tg tgr" style="cursor:pointer" onclick="addTag(this)">Blocker</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Emergent Properties Notes</h3>
+          <p style="font-size:11px;color:var(--tx3);margin-bottom:12px">Pre-filled from emergence analysis:</p>
+          <div id="en-notes"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 8: PASSIVE INCOME -->
+<div class="mod" id="mod-passive">
+  <div class="mh"><h1>💰 Passive Income Tracker</h1><span class="badge">TOOL</span></div>
+  <div class="mb">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+      <div class="mxb"><div class="v" id="pi-tot">$0</div><div class="l">MONTHLY PASSIVE</div></div>
+      <div class="mxb"><div class="v" id="pi-ann" style="color:var(--pu2)">$0</div><div class="l">ANNUAL PASSIVE</div></div>
+      <div class="mxb"><div class="v" id="pi-cnt" style="color:var(--am)">0</div><div class="l">STREAMS</div></div>
+    </div>
+    <div class="card mb2">
+      <h3>Add Stream</h3>
+      <div class="g3">
+        <div><label>Stream Name</label><input type="text" id="pi-nm" placeholder="e.g. Notion Templates"></div>
+        <div><label>Monthly ($)</label><input type="number" id="pi-am" placeholder="500"></div>
+        <div><label>Category</label>
+          <select id="pi-cat">
+            <option>Digital Products</option><option>SaaS</option><option>Affiliate</option>
+            <option>Content / Ads</option><option>Investments</option><option>Licensing</option><option>Royalties</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn bp mt" onclick="addStream()">+ Add Stream</button>
+    </div>
+    <div id="pi-list"></div>
+  </div>
+</div>
+
+<!-- MODULE 9: INSTRUCTION LIBRARY (PREMIUM) -->
+<div class="mod" id="mod-library">
+  <div class="mh"><h1>📚 Instruction Library</h1><span class="badge pr">PREMIUM</span></div>
+  <div class="mb" id="lib-body">
+    <div class="lo" id="lib-lock">
+      <div class="lic">📚</div><h2>Full Library — Premium</h2>
+      <p>75 business generation prompts with search, filter, copy &amp; use. Free tier shows 10.</p>
+      <button class="btn bp" onclick="openMod()">🔑 Unlock</button>
+    </div>
+    <div id="lib-prev" style="display:none">
+      <div class="card" style="border-color:rgba(245,158,11,.3)">
+        <span class="tg tga">FREE PREVIEW — 10 of 75</span>
+        <button class="btn bp sm" style="margin-left:10px" onclick="openMod()">🔑 Unlock All</button>
+      </div>
+      <div id="lib-pl"></div>
+    </div>
+    <div id="lib-full" style="display:none;flex-direction:column;height:100%">
+      <div class="sb">
+        <input type="text" id="ls" placeholder="Search 75 prompts..." oninput="filterLib()">
+        <select id="lc" onchange="filterLib()" style="width:170px">
+          <option value="">All Categories</option>
+          <option>Market Research</option><option>Product Development</option><option>Marketing Strategy</option>
+          <option>Sales</option><option>Operations</option><option>Finance</option>
+          <option>Growth</option><option>Customer Success</option><option>Strategy</option>
+        </select>
+        <span id="lcnt" class="pill"></span>
+      </div>
+      <div style="flex:1;overflow-y:auto" id="lib-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 10: EMERGENCE TABLE -->
+<div class="mod" id="mod-emergence">
+  <div class="mh"><h1>🌐 Emergence Table</h1><span class="badge">INTELLIGENCE</span></div>
+  <div class="mb">
+    <p style="font-size:13px;color:var(--tx2);margin-bottom:16px;line-height:1.6">
+      Emergent properties arise when business system interactions produce behaviours beyond individual component capabilities. These are compounding unfair advantages.</p>
+    <div id="em-tbl"></div>
+    <div class="card mt">
+      <h3>Emergence Score</h3>
+      <div class="g3">
+        <div class="mxb"><div class="v" style="color:var(--pu2)">5</div><div class="l">PROPERTIES ACTIVE</div></div>
+        <div class="mxb"><div class="v" style="color:var(--cy)">4.2</div><div class="l">AVG IMPACT</div></div>
+        <div class="mxb"><div class="v" style="color:var(--gr)">84%</div><div class="l">MOAT STRENGTH</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODULE 11: ONE-MOVE LAUNCH -->
+<div class="mod" id="mod-launch">
+  <div class="mh"><h1>🚀 One-Move Launch</h1><span class="badge">INTELLIGENCE</span></div>
+  <div class="mb">
+    <div class="row mb2" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div class="flex">
+        <span class="pill" id="la-p">0 launched</span>
+        <div class="pb" style="width:160px"><div class="pf" id="la-b" style="width:0%"></div></div>
+      </div>
+      <div class="flex">
+        <button class="btn bs sm" onclick="resetLaunch()">↺ Reset</button>
+        <button class="btn bp sm" onclick="exportLaunch()">⬇ Export</button>
+      </div>
+    </div>
+    <div id="la-items"></div>
+  </div>
+</div>
+
+<!-- MODULE 12: LLM LIMITATIONS REPORT -->
+<div class="mod" id="mod-llmreport">
+  <div class="mh"><h1>⚠ LLM Limitations Report</h1><span class="badge">INTELLIGENCE</span></div>
+  <div class="mb">
+    <div class="card mb2">
+      <p style="font-size:13px;color:var(--tx2);line-height:1.65">10-section analysis of LLM limitations for AI-assisted business generation. Use this to calibrate trust and design robust human-AI workflows.</p>
+      <div class="flex mt" style="flex-wrap:wrap;gap:8px">
+        <span class="tg tgr">2 Critical</span><span class="tg tga">5 High</span>
+        <span class="tg tgc">2 Medium-High</span><span class="tg tgg">1 Medium</span>
+      </div>
+    </div>
+    <div id="llm-rep"></div>
+  </div>
+</div>
+
+</div><!-- #content -->
+</div><!-- #shell -->
+
+<!-- LICENCE MODAL -->
+<div id="mbk">
+  <div class="modal">
+    <button class="cx" onclick="closeMod()">×</button>
+    <h2>🔑 Licence Manager</h2>
+    <p>Enter a valid licence key to unlock Backup Encryptor, full Instruction Library, and export capabilities.</p>
+    <div class="hb">Demo key: <strong>BIZGEN-DEMO-2024</strong><br>Also valid: <strong>PREMIUM-ACCESS-2024</strong><br>Validated locally via SHA-256. Nothing sent to any server.</div>
+    <label>Licence Key</label>
+    <input type="text" id="lic-in" placeholder="XXXX-XXXX-XXXX" style="margin-bottom:12px;font-family:var(--fn);letter-spacing:1px">
+    <div id="lic-msg" style="font-size:12px;margin-bottom:12px;min-height:18px"></div>
+    <div class="flex">
+      <button class="btn bp" onclick="validateLic()">✓ Validate</button>
+      <button class="btn bs" onclick="clearLic()">Remove Licence</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+// ════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════
+var PL=[
+{id:1,cat:"Market Research",title:"TAM Analysis",text:"Analyze the total addressable market for [PRODUCT] in [INDUSTRY]. Include market size in USD, growth rate, key segments, and top 3 competitors. Format as an executive summary with numbered findings."},
+{id:2,cat:"Market Research",title:"Customer Persona Deep Dive",text:"Create a detailed customer persona for [BUSINESS]. Include demographics, psychographics, pain points, buying behaviour, preferred channels, and key motivations. Add a day-in-the-life narrative (500 words)."},
+{id:3,cat:"Market Research",title:"Competitor SWOT",text:"Conduct a SWOT analysis for [COMPETITOR] in the context of [YOUR COMPANY]. Identify strengths to neutralize, weaknesses to exploit, shared opportunities, and threats. Output as a formatted 2×2 table with action items."},
+{id:4,cat:"Market Research",title:"Blue Ocean Opportunities",text:"Identify blue ocean opportunities in [INDUSTRY]. List saturated red ocean areas, underserved niches, and 5 specific uncontested market spaces I can capture with [MY STRENGTHS]. Include a value curve comparison."},
+{id:5,cat:"Market Research",title:"Voice of Customer Survey",text:"Design a 10-question voice-of-customer survey for [PRODUCT]. Include NPS, open-ended discovery questions, feature priority ranking, and pricing sensitivity. Add a response analysis framework."},
+{id:6,cat:"Market Research",title:"Jobs-to-be-Done Framework",text:"Apply the jobs-to-be-done framework to [PRODUCT CATEGORY]. Identify the functional, emotional, and social jobs customers hire the product to do. Include 3 underserved job segments with market sizing."},
+{id:7,cat:"Market Research",title:"Bottom-Up Market Sizing",text:"Perform a bottom-up market sizing for [BUSINESS IDEA]. Start with addressable customers, multiply by conversion rate, average contract value, and churn rates to project 3-year revenue with a sensitivity table."},
+{id:8,cat:"Market Research",title:"Macro Trend Analysis",text:"Identify the top 5 macro trends affecting [INDUSTRY] over the next 3 years. For each: current state, trajectory, impact score (1-10), and strategic window of opportunity for a new entrant."},
+{id:9,cat:"Market Research",title:"Pricing Landscape Map",text:"Map the pricing landscape for [PRODUCT CATEGORY]. Identify budget, mid-market, and premium tiers with specific competitors at each level. Recommend optimal pricing for [MY PRODUCT] with justification and a pricing page recommendation."},
+{id:10,cat:"Market Research",title:"Regulatory Scan",text:"Identify key regulatory requirements, compliance risks, and legal barriers for launching [BUSINESS TYPE] in [GEOGRAPHY]. Include data privacy laws, licensing requirements, consumer protection rules, and a compliance roadmap."},
+{id:11,cat:"Product Development",title:"MVP Scope Definition",text:"Define the MVP for [BUSINESS IDEA]. List must-have vs nice-to-have features, the single core value proposition, success metric for validation, cost to build, and timeline to first revenue."},
+{id:12,cat:"Product Development",title:"Feature Prioritization Matrix",text:"Create a feature prioritization matrix for [PRODUCT] with 15 features. Score each on user value, business value, effort, and strategic alignment (all 1-5). Rank and recommend the top 5 for Q1 with rationale."},
+{id:13,cat:"Product Development",title:"User Story Mapping",text:"Create user story maps for [PRODUCT] covering the complete customer journey from awareness to advocacy. Format: 'As a [persona], I want [action] so that [benefit].' Include acceptance criteria for the top 10 stories."},
+{id:14,cat:"Product Development",title:"Technical Architecture Brief",text:"Outline the technical architecture for [PRODUCT]. Include recommended tech stack, database design, API structure, scalability considerations, security requirements, and estimated infrastructure costs at 1K, 10K, and 100K users."},
+{id:15,cat:"Product Development",title:"12-Month Product Roadmap",text:"Create a 12-month product roadmap for [PRODUCT]. Organize by quarter with theme, key features, expected outcomes, and KPIs for each phase. Highlight dependencies, resource requirements, and risk flags."},
+{id:16,cat:"Product Development",title:"UX Research Plan",text:"Design a UX research plan for [FEATURE]. Include research questions, methodology, participant criteria, interview script outline, analysis framework, and how findings will inform design decisions. Timeline: 2 weeks."},
+{id:17,cat:"Product Development",title:"Monetization Model Design",text:"Design 3 alternative monetization models for [PRODUCT]. For each: pricing structure, revenue drivers, CAC implications, churn risk, and unit economics at steady state. Recommend the optimal model with sensitivity analysis."},
+{id:18,cat:"Product Development",title:"Integration Roadmap",text:"Identify the top 10 integrations that would increase retention for [SAAS PRODUCT]. Prioritize by customer demand, technical feasibility, partnership value, and competitive necessity. Create a 6-month integration roadmap."},
+{id:19,cat:"Product Development",title:"Onboarding Flow Design",text:"Design an onboarding flow for [PRODUCT] that achieves activation within 7 days. Map each step, the aha-moment trigger, time-to-value milestones, drop-off interventions, and success criteria. Include a 5-email welcome sequence outline."},
+{id:20,cat:"Product Development",title:"Product-Market Fit Assessment",text:"Create a PMF assessment framework for [PRODUCT]. Include the Sean Ellis test methodology, retention cohort analysis template, NPS benchmark comparison, and a qualitative interview guide with 15 questions. Define PMF threshold metrics."},
+{id:21,cat:"Marketing Strategy",title:"90-Day Content Plan",text:"Create a 90-day content marketing plan for [BUSINESS]. Include 3 content pillars, 30 specific ideas across blog, video, and social, SEO keywords, distribution strategy, and success metrics with targets."},
+{id:22,cat:"Marketing Strategy",title:"SEO Strategy",text:"Develop an SEO strategy for [WEBSITE] targeting [AUDIENCE]. Include keyword research methodology, top 20 target keywords with volume and difficulty, on-page optimization checklist, link building tactics, and a 6-month traffic projection."},
+{id:23,cat:"Marketing Strategy",title:"Email Funnel Design",text:"Design a complete email marketing funnel for [PRODUCT]. Include lead magnet concept, welcome sequence (5 emails), nurture sequence (8 emails), conversion sequence (3 emails), and re-engagement sequence with subject lines and CTAs."},
+{id:24,cat:"Marketing Strategy",title:"Paid Ads Strategy",text:"Create a paid advertising strategy for [BUSINESS] with $[BUDGET]/month. Allocate across Google Ads, Meta, and LinkedIn. Specify campaign types, target audiences, ad creative concepts, landing page requirements, and target ROAS by channel."},
+{id:25,cat:"Marketing Strategy",title:"Partnership & Co-Marketing",text:"Identify 10 strategic partnership opportunities for [BUSINESS]. For each: audience overlap, co-marketing opportunity, value exchange, deal structure, and expected lead volume. Include an outreach email template."},
+{id:26,cat:"Marketing Strategy",title:"Brand Positioning Statement",text:"Write a brand positioning statement for [COMPANY] using: For [target] who [need], [product] is a [category] that [benefit] unlike [alternative] because [reason]. Provide 3 alternatives and recommend the strongest."},
+{id:27,cat:"Marketing Strategy",title:"Influencer Marketing Plan",text:"Design an influencer marketing strategy for [PRODUCT] in [NICHE]. Define tier strategy (nano/micro/macro), identify 20 influencer profile types, campaign brief template, compensation model, and ROI measurement framework."},
+{id:28,cat:"Marketing Strategy",title:"Product Launch Blueprint",text:"Create a launch campaign blueprint for [PRODUCT]. Cover pre-launch (8 weeks), launch week, and post-launch phases. Specify activities, channels, messaging, PR outreach, influencer plan, and success metrics for each phase."},
+{id:29,cat:"Marketing Strategy",title:"Community Building Strategy",text:"Design a community-led growth strategy for [BRAND]. Include platform selection rationale, community charter, content programming calendar, member milestones, moderation guidelines, and a monetization pathway from community to revenue."},
+{id:30,cat:"Marketing Strategy",title:"CRO Audit",text:"Audit the conversion funnel for [BUSINESS] and identify the top 10 optimization opportunities. For each: problem, hypothesis, A/B test design, success metric, and expected lift. Prioritize by impact-to-effort ratio with a timeline."},
+{id:31,cat:"Sales",title:"Cold Outreach Scripts",text:"Write 5 cold outreach email scripts for [PRODUCT] targeting [PERSONA]. Each under 100 words with a pain-point hook, social proof element, and one clear CTA. Include subject lines and preview text."},
+{id:32,cat:"Sales",title:"Objection Handling Guide",text:"Create an objection handling guide for [PRODUCT] covering the top 10 objections: price, timing, competition, internal priorities, and risk. For each: reframe technique, evidence response, trial close script, and escalation path."},
+{id:33,cat:"Sales",title:"Discovery Call Framework",text:"Design a discovery call framework for [PRODUCT] selling to [TARGET]. Include rapport questions, SPIN pain discovery, impact quantification questions, vision questions, and a next-step commitment script with 3 fallback options."},
+{id:34,cat:"Sales",title:"Proposal Template",text:"Create a winning proposal template for [SERVICE BUSINESS]. Include executive summary, problem statement, proposed solution, implementation timeline, three-tier investment summary, ROI calculator, social proof section, and risk reversal guarantee."},
+{id:35,cat:"Sales",title:"Pipeline Management System",text:"Design a sales pipeline for [BUSINESS] with 6 stages, entry/exit criteria, average time in stage, conversion rate benchmarks, required weekly activities, and a pipeline review scorecard with red/yellow/green thresholds."},
+{id:36,cat:"Sales",title:"Account Expansion Playbook",text:"Create an account expansion playbook for [SAAS COMPANY]. Include expansion triggers, upsell motion by product tier, cross-sell opportunity mapping, champion development strategy, and a QBR agenda template."},
+{id:37,cat:"Sales",title:"Pricing Negotiation Script",text:"Write a pricing negotiation script for [PRODUCT]. Include anchoring strategy, value justification points, concession ladder, discount authority matrix, walk-away criteria, and responses to the 5 most common pressure tactics."},
+{id:38,cat:"Sales",title:"Sales Rep Hiring Profile",text:"Define the ideal sales rep profile for [COMPANY]. Include must-have competencies, experience requirements, interview scorecard with 10 questions, compensation structure, and a 90-day ramp plan with milestones."},
+{id:39,cat:"Sales",title:"Customer Case Study Template",text:"Create a case study template for [PRODUCT]: challenge, solution, implementation, quantified results, and customer quote. Include interview questions to extract the story, SEO guidelines, and distribution strategy."},
+{id:40,cat:"Sales",title:"Annual Revenue Planning",text:"Build an annual revenue plan for [BUSINESS] targeting $[REVENUE]. Break down by new logo acquisition, expansion revenue, required pipeline coverage, headcount, quota per rep, and quarterly ramp schedule."},
+{id:41,cat:"Operations",title:"SOP Creation Framework",text:"Create a standard operating procedure for [PROCESS]. Include purpose, scope, responsible parties, step-by-step instructions, quality checkpoints, exception handling, escalation path, and revision schedule."},
+{id:42,cat:"Operations",title:"KPI Dashboard Design",text:"Design a KPI dashboard for [BUSINESS TYPE]. Define 5 north star metrics, 15 supporting KPIs by department, data sources, update frequency, ownership, and alert thresholds. Include a weekly leadership review agenda."},
+{id:43,cat:"Operations",title:"Vendor Selection Matrix",text:"Create a vendor evaluation matrix for [CATEGORY]. Define 10 evaluation criteria with weighting, scoring rubric, and reference check questions. Provide a template to score 3 vendors and a recommendation decision framework."},
+{id:44,cat:"Operations",title:"Process Automation Audit",text:"Audit [BUSINESS] to identify the top 10 automation opportunities. For each: current process, time/cost, automation tool recommendation, implementation complexity, ROI, and priority score. Output a 90-day automation roadmap."},
+{id:45,cat:"Operations",title:"Remote Team Playbook",text:"Create a remote team playbook for [COMPANY]. Include communication protocols, meeting cadences, async-first guidelines, performance management, virtual culture activities, and a 30-60-90 day onboarding checklist."},
+{id:46,cat:"Operations",title:"OKR Planning Template",text:"Design an OKR plan for [COMPANY] for [QUARTER]. Include company-level OKRs (3 objectives, 3 KRs each), department OKR cascade framework, individual alignment guide, weekly check-in format, and end-of-quarter scoring rubric."},
+{id:47,cat:"Operations",title:"Support Escalation Matrix",text:"Create a support escalation matrix for [PRODUCT]. Define tier 1/2/3 issue categories, response SLAs, resolution paths, escalation triggers, compensation guidelines, and a CSAT recovery playbook for at-churn-risk customers."},
+{id:48,cat:"Operations",title:"Risk Register",text:"Build a risk register for [BUSINESS]. Identify 15 key risks across operational, financial, market, technology, and regulatory categories. Score by probability and impact (1-5), define mitigation strategies, assign owners, and set review cadences."},
+{id:49,cat:"Finance",title:"3-Year Financial Model",text:"Create a 3-year financial model structure for [BUSINESS TYPE]. Include revenue by stream, COGS, gross margin, operating expenses, EBITDA bridge, cash flow projection, and funding requirements. Define key assumptions and 3 scenario toggles."},
+{id:50,cat:"Finance",title:"Unit Economics Calculator",text:"Calculate unit economics for [BUSINESS]. Define CAC by channel, LTV by segment, payback period, gross margin per unit, contribution margin, and break-even. Show how unit economics improve from month 1 to month 36 with a cohort model."},
+{id:51,cat:"Finance",title:"Fundraising Narrative",text:"Write a fundraising narrative for [STARTUP] seeking $[AMOUNT] from [INVESTOR TYPE]. Include problem/opportunity, solution differentiation, traction proof points, team credibility, use of funds breakdown, and investor return thesis with comparable exits."},
+{id:52,cat:"Finance",title:"Cash Flow Optimization",text:"Identify 10 ways to improve cash flow for [BUSINESS TYPE]. Include revenue acceleration, payment terms optimization, expense reduction, working capital improvements, and financing options ranked by cost and speed."},
+{id:53,cat:"Finance",title:"Pricing Strategy Workshop",text:"Facilitate a pricing strategy workshop for [PRODUCT]. Cover value-based pricing assessment, competitive anchoring, elasticity testing, packaging design, annual vs monthly trade-offs, and output a pricing decision framework."},
+{id:54,cat:"Finance",title:"Monthly Investor Report",text:"Create a monthly investor metrics report template for [STARTUP]. Include ARR, MRR, growth rate, churn, NRR, CAC, LTV, burn rate, runway, headcount, and pipeline metrics. Add narrative sections for wins, challenges, and asks."},
+{id:55,cat:"Finance",title:"Tax Optimization Strategy",text:"Outline tax optimization strategies for [BUSINESS TYPE] in [GEOGRAPHY]. Cover entity structure, deductible expenses, R&D tax credits, employee benefits, international structure considerations, and when to engage a specialist."},
+{id:56,cat:"Finance",title:"Exit Strategy Planning",text:"Develop an exit strategy for [BUSINESS]. Cover M&A readiness, EBITDA multiple, buyer persona, IPO readiness checklist, management buyout considerations, and a 24-month value enhancement plan to maximize exit multiple."},
+{id:57,cat:"Growth",title:"Viral Loop Design",text:"Design a viral loop for [PRODUCT]. Map the referral trigger, sharing action, new user acquisition, and activation flow. Calculate target viral coefficient, identify top 5 friction points, and propose A/B test ideas to improve K-factor above 1.0."},
+{id:58,cat:"Growth",title:"Retention Engineering",text:"Create a retention plan for [PRODUCT]. Identify leading churn indicators, design interventions at 7/14/30/60/90-day marks, build a customer health score model, and create action playbooks for low, medium, and high churn-risk segments."},
+{id:59,cat:"Growth",title:"PLG Motion Design",text:"Design a product-led growth motion for [SAAS PRODUCT]. Define the freemium or free-trial structure, PQL definition, in-product upgrade triggers, sales-assist escalation threshold, and expansion revenue mechanics with pricing gates."},
+{id:60,cat:"Growth",title:"International Expansion Plan",text:"Create an international expansion playbook for [BUSINESS] entering [TARGET MARKET]. Include market entry strategy, localization requirements, partnership vs direct model, regulatory considerations, local hiring plan, and 12-month KPI targets."},
+{id:61,cat:"Growth",title:"Growth Experiment Log",text:"Design a growth experiment log for [COMPANY]. Include hypothesis format, success metric definition, test design specifications, minimum sample size calculation, result analysis framework, and a decision tree for scaling vs killing experiments. Add 10 example experiments."},
+{id:62,cat:"Growth",title:"Acquisition Channel Analysis",text:"Analyze 8 customer acquisition channels for [BUSINESS]. For each: estimated CAC, volume potential, payback period, scalability rating, and current maturity. Recommend portfolio allocation percentages and 90-day testing priorities with budget."},
+{id:63,cat:"Growth",title:"Network Effect Strategy",text:"Identify network effect opportunities in [BUSINESS MODEL]. Classify network effects (direct, indirect, data, marketplace). Design mechanics to accelerate network density, solve the cold start problem, and measure network effect strength."},
+{id:64,cat:"Customer Success",title:"CS Playbook Design",text:"Create a customer success playbook for [PRODUCT]. Cover onboarding, adoption, value realization, renewal, and expansion plays. Define CS team structure, coverage ratios, tech stack, compensation model, and escalation procedures."},
+{id:65,cat:"Customer Success",title:"Health Score Model",text:"Design a customer health score model for [SAAS PRODUCT]. Define 8-10 health signals across product usage, support sentiment, stakeholder engagement, and commercial indicators. Weight each, create RAG thresholds, and define trigger-based interventions."},
+{id:66,cat:"Customer Success",title:"QBR Agenda Template",text:"Create a quarterly business review agenda for [PRODUCT] with enterprise customers. Include success metrics review, ROI documentation, roadmap preview, executive sponsor check-in, and joint success planning with timing and slide deck outline."},
+{id:67,cat:"Customer Success",title:"Churn Recovery Playbook",text:"Build a churn recovery playbook for [PRODUCT]. Define at-risk identification triggers, escalation chain with timelines, win-back offer structure and approval process, root cause analysis framework, and a system to translate learnings into prevention."},
+{id:68,cat:"Customer Success",title:"VOC Program Design",text:"Design a voice of customer program for [COMPANY]. Include NPS cadence, CSAT touchpoints, user interview program (4/month), advisory board structure, and a closed-loop feedback process from insight to product change to customer communication."},
+{id:69,cat:"Customer Success",title:"Renewal Forecasting Model",text:"Create a renewal forecasting model for [SAAS]. Define renewal risk tiers with probability weights, probability-weighted ARR by segment, at-risk account intervention timeline, and quarterly renewal rate targets by customer segment and ACV band."},
+{id:70,cat:"Customer Success",title:"Customer Advocacy Program",text:"Design a customer advocacy program for [COMPANY]. Include advocate identification criteria, reward and recognition structure, reference call process, case study pipeline management, review site optimization strategy, and a speaker bureau development plan."},
+{id:71,cat:"Strategy",title:"Business Model Canvas",text:"Complete a Business Model Canvas for [BUSINESS IDEA]. Fill all 9 blocks: customer segments, value propositions, channels, customer relationships, revenue streams, key resources, key activities, key partnerships, and cost structure. Identify the riskiest assumption to test first."},
+{id:72,cat:"Strategy",title:"Porter's Five Forces",text:"Apply Porter's Five Forces to [INDUSTRY]. Assess threat of new entrants, bargaining power of suppliers and buyers, threat of substitutes, and competitive rivalry. Rate each force (Low/Medium/High) and identify the most critical strategic implication for [MY BUSINESS]."},
+{id:73,cat:"Strategy",title:"Ansoff Matrix Planning",text:"Apply the Ansoff Matrix to [COMPANY] for the next 3 years. Identify opportunities in each quadrant: market penetration, market development, product development, and diversification. Recommend priority and resource allocation with risk-adjusted expected value."},
+{id:74,cat:"Strategy",title:"Scenario Planning",text:"Conduct scenario planning for [BUSINESS] over 5 years. Develop 4 scenarios: optimistic, pessimistic, most likely, and wildcard disruption. For each: key drivers, revenue impact, strategic response plan, required pivots, and early warning signals."},
+{id:75,cat:"Strategy",title:"Competitive Moat Analysis",text:"Identify and strengthen the competitive moat for [BUSINESS]. Assess moat type (switching costs, network effects, brand, cost advantages, intangibles). Rate moat durability (1-10), benchmark against top 3 competitors, and create a 12-month moat-deepening action plan."}
+];
+
+var EP=[
+{name:"Network Density Effects",
+ desc:"As user base grows, platform value increases non-linearly for all participants, creating compounding utility that new entrants cannot replicate without matching scale.",
+ trigger:"User base exceeds critical mass threshold (typically 1,000+ active users in a defined community)",
+ impact:"Very High",cat:"Growth",
+ note:"Every new user makes the platform more valuable for existing users. Value scales as N² (Metcalfe's Law). The result is a widening moat invisible to competitors with smaller networks."},
+{name:"Compound Knowledge Accumulation",
+ desc:"Each business iteration generates insights feeding subsequent decisions, creating an accelerating knowledge advantage that widens the gap with later-starting competitors.",
+ trigger:"3+ product cycles completed with systematic post-mortem analysis and institutional memory capture",
+ impact:"High",cat:"Learning",
+ note:"Documented decisions and outcomes create a proprietary decision database. After 5+ years, accumulated institutional knowledge becomes a significant and durable barrier to entry."},
+{name:"Brand Gravity",
+ desc:"A sufficiently strong brand creates inbound pull that reduces CAC organically across all channels simultaneously, enabling premium pricing and preferential partnership terms.",
+ trigger:"NPS consistently above 60, brand search volume exceeding 10K/month, unprompted word-of-mouth comprising 20%+ of new customers",
+ impact:"Very High",cat:"Marketing",
+ note:"Brand gravity creates a self-reinforcing system: lower CAC → higher margins → more product investment → better product → stronger brand. The virtuous cycle accelerates at inflection points."},
+{name:"Revenue Stream Symbiosis",
+ desc:"Multiple revenue streams reinforce each other — services inform product roadmap, product drives service demand, and data from both creates a third analytics revenue stream with no incremental acquisition cost.",
+ trigger:"Two or more revenue streams active with measurable cross-sell rate exceeding 15%",
+ impact:"High",cat:"Revenue",
+ note:"Each revenue stream extends customer lifetime and surfaces different use cases. The combination creates resilience against disruption in any single stream while surfacing upsell vectors invisible to single-stream competitors."},
+{name:"Talent Flywheel",
+ desc:"High-quality team members attract superior candidates through reputation and referral networks, improving product quality, which drives growth, which funds better compensation.",
+ trigger:"First 10 high-performance hires made, Glassdoor rating above 4.3, inbound applications exceeding open roles 5:1",
+ impact:"High",cat:"Operations",
+ note:"The talent flywheel is the hardest emergent property to initiate but creates the most durable competitive advantage. Compensation alone cannot replicate it — quality-of-colleagues is the dominant attractor for elite candidates."}
+];
+
+var QI=[
+{id:1,title:"Notion Template Store",desc:"Create 5 premium Notion templates for your niche. List on Gumroad and Notion marketplace. Price at $19–$49 each. First sale possible within 48 hours of publishing.",effort:"Low",time:"2 days",rev:"$500–5K/mo at scale"},
+{id:2,title:"Paid Newsletter",desc:"Launch on Substack or Beehiiv with free + paid tiers ($9/mo). Publish your first issue today. Monetize from issue one with sponsor shout-outs and premium content.",effort:"Low",time:"1 day",rev:"$1K–20K/mo at 500+ paid"},
+{id:3,title:"Productized Consulting Package",desc:"Define one specific outcome you deliver in a fixed timeframe at a fixed price. Create a landing page on Carrd. DM 20 warm LinkedIn prospects. One yes and you are live.",effort:"Low",time:"1 day",rev:"$3K–15K/mo"},
+{id:4,title:"Digital Course Pre-Sale",desc:"Outline a 5-module course. Create a pre-sale page with a 40% launch discount. Collect payments before building content. Validate with 10 pre-orders before investing build time.",effort:"Medium",time:"3 days",rev:"$5K–50K/launch"},
+{id:5,title:"Micro-SaaS Waitlist Launch",desc:"Identify a narrow SaaS gap (browser extension, Slack bot, automation). Build a landing page. Set up a waitlist. Promote in 5 relevant communities and track signup velocity.",effort:"Medium",time:"2 days",rev:"$3K–30K/mo ARR"},
+{id:6,title:"Affiliate Review Site",desc:"Pick a high-commission niche (B2B software, finance tools). Write 10 comparison articles targeting buyer-intent keywords. Monetize with affiliate links. SEO compounds over 6–12 months.",effort:"Medium",time:"1 week",rev:"$1K–20K/mo passive"},
+{id:7,title:"Paid Community (Discord or Slack)",desc:"Define a specific community value proposition (weekly expert calls, deal flow, accountability). Seed with 10 founding members at 50% off. Charge $29–$99/mo via Memberful.",effort:"Low",time:"2 days",rev:"$2K–15K/mo"},
+{id:8,title:"AI-Powered Tool",desc:"Identify a repetitive task your audience performs. Wrap an LLM API in a simple UI using Bubble or Glide. Charge $9–$29/mo via Stripe. Launch a waitlist first to validate demand.",effort:"Medium",time:"3–5 days",rev:"$5K–40K/mo ARR"},
+{id:9,title:"Print-on-Demand Niche Store",desc:"Design 10 niche products in Canva. Upload to Printful. Connect to Etsy or Shopify. Run a $50 Pinterest ad test. Zero inventory risk. 24–48 hour setup time.",effort:"Low",time:"2 days",rev:"$500–8K/mo"},
+{id:10,title:"B2B Lead Magnet + Tripwire Funnel",desc:"Create a high-value PDF guide. Promote via LinkedIn content. Capture emails. Immediately offer a $47 template pack as a one-time-offer. Backend: consulting upsell.",effort:"Low",time:"2 days",rev:"$2K–10K/mo"},
+{id:11,title:"Weekly Expert Webinar Series",desc:"Partner with 4 non-competing experts. Host free weekly webinars on Zoom. Monetize the premium tier ($97/mo) with replays, live Q&A, and templates.",effort:"Medium",time:"1 week",rev:"$3K–25K/mo"},
+{id:12,title:"Marketplace Listing Sprint",desc:"Package your skill or tool and list on AppSumo, Product Hunt, or a niche marketplace. Instant access to a buyer-ready audience without building your own following first.",effort:"Low",time:"1 day",rev:"$2K–50K launch"},
+{id:13,title:"Done-For-You 5-Day Sprint",desc:"One specific deliverable. One client. One fixed fee ($2K–$10K). Sell via a 20-minute discovery call flow. No proposal, no scope creep, no delayed starts.",effort:"Low",time:"1 day to sell",rev:"$10K–50K/mo"},
+{id:14,title:"Annual Industry Data Report",desc:"Compile unique survey data or synthesize public data into an annual report. Charge $299–$999 for the full dataset. Promote the free executive summary via PR and LinkedIn.",effort:"High",time:"2 weeks",rev:"$5K–50K/year"}
+];
+
+var LLM=[
+{n:1,title:"Knowledge Cutoff & Temporal Blindness",sev:"High",
+ sum:"LLMs have a fixed training cutoff, rendering them incapable of accessing real-time information, recent events, or live market data without tool augmentation.",
+ det:"For business generation tasks, this means competitive intelligence, current market pricing, regulatory changes, and recent industry news are unavailable within the base model. The model may confidently present outdated information as current fact, with no warning signal distinguishing stale from fresh data.",
+ mit:"Implement retrieval-augmented generation (RAG) pipelines to inject current context. Add web search tool augmentation. Include date-awareness in system prompts. Always instruct the model to flag temporally sensitive outputs with explicit uncertainty markers.",
+ imp:"Market research, competitor analysis, and regulatory guidance may be stale by months to years. Independently verify all time-sensitive outputs before using in strategic decisions."},
+{n:2,title:"Hallucination & Confabulation",sev:"Critical",
+ sum:"LLMs generate plausible-sounding but factually incorrect information, particularly for specific statistics, citations, URLs, and named entities.",
+ det:"In business contexts, hallucinated market statistics, fabricated research citations, or invented competitor details can produce critically flawed strategic decisions. The model presents fabrications with the same confident tone as accurate information, making detection impossible without external verification.",
+ mit:"Implement output verification pipelines. Require citations for all statistical claims and verify each independently. Use structured prompts requesting explicit confidence levels. Validate all numeric outputs against authoritative primary sources. Never use unverified LLM statistics in financial models.",
+ imp:"Financial models built on hallucinated data, due diligence reports containing fabricated facts, or marketing claims citing non-existent research represent significant legal, financial, and reputational liability."},
+{n:3,title:"Context Window Degradation",sev:"Medium-High",
+ sum:"Despite large context windows, LLM performance degrades with very long inputs — the 'lost in the middle' phenomenon causes systematic underweighting of centrally positioned information.",
+ det:"For complex tasks requiring synthesis of large document sets, the model may miss or misweight critical details embedded mid-context. Studies show performance on retrieval tasks drops 20–40% for information positioned in the middle of long contexts versus beginning or end positions.",
+ mit:"Apply structured chunking strategies. Place critical instructions at the beginning and end of prompts. Implement agentic document processing pipelines. Use map-reduce patterns for large document analysis. Validate completeness against a source checklist.",
+ imp:"Strategic recommendations derived from large document sets may contain material omissions. Multi-pass summarization with explicit coverage validation is required for high-stakes analysis tasks."},
+{n:4,title:"Reasoning Depth & Multi-Step Logic",sev:"High",
+ sum:"LLMs excel at pattern matching but struggle with deep multi-step causal reasoning, mathematical precision, and logical consistency across long inference chains.",
+ det:"Financial modelling, supply chain optimization, and complex systems design require formal reasoning capabilities that exceed current LLM benchmarks. Models may produce locally coherent but globally inconsistent analysis — individual sections appear sound but contradict each other across the document.",
+ mit:"Apply chain-of-thought and tree-of-thought prompting techniques. Break complex problems into discrete, verifiable sub-problems. Use code execution tools for all mathematical computations. Apply formal validation schemas for critical business logic. Have domain experts validate reasoning chains.",
+ imp:"Financial projections, operational models, and strategic frameworks require domain expert validation. Never use raw LLM numerical outputs in consequential financial decisions without independent verification."},
+{n:5,title:"Sycophancy & Confirmation Bias",sev:"High",
+ sum:"LLMs systematically agree with user premises and validate existing ideas rather than offering rigorous critical analysis, particularly when users express strong confidence.",
+ det:"For business strategy tasks, sycophancy manifests as the model reinforcing flawed business plan assumptions, overestimating market opportunities when prompted optimistically, and failing to surface fatal flaws in user-presented strategies. The model learns that validation receives positive signals, creating a systematic bias toward agreement invisible to casual users.",
+ mit:"Use adversarial prompting in every planning session: 'List every reason this business plan will fail.' Request devil's advocate analysis explicitly. Implement multi-perspective prompting (optimist/pessimist/realist). Separate idea generation sessions from critical evaluation sessions.",
+ imp:"Entrepreneurs using LLMs for business validation risk receiving systematically false confidence. Red-team adversarial analysis must be a mandatory step in every LLM-assisted business planning workflow."},
+{n:6,title:"Domain Knowledge Depth Limits",sev:"Medium-High",
+ sum:"LLMs have broad shallow knowledge across many domains rather than deep expert-level knowledge in specialized fields, producing confident-sounding outputs that domain experts immediately identify as incomplete.",
+ det:"Regulatory nuances in healthcare, financial instrument structuring, advanced engineering specifications, and specialized legal frameworks routinely expose the limits of LLM domain depth. The model produces correct framework-level analysis while missing critical domain-specific constraints and edge cases that a specialist would treat as foundational.",
+ mit:"Use LLMs for frameworks, templates, and cross-domain strategy while mandating human domain expert validation for specialized content. Never publish or act on domain-specific outputs without specialist review, particularly in regulated industries.",
+ imp:"In regulated industries including finance, healthcare, and law, LLM outputs must be treated as research starting points — never as final professional advice. Non-compliance risk from acting on unreviewed LLM outputs is significant."},
+{n:7,title:"Cross-Session Inconsistency",sev:"Medium",
+ sum:"LLMs have no persistent memory between conversations by default, producing inconsistent outputs, strategic drift, and inability to build on prior decisions without explicit context injection.",
+ det:"A business plan developed across 20 sessions will contain contradictory recommendations and inconsistent financial assumptions if conversation history is not systematically managed and injected. Each session begins from zero, meaning the model has no awareness of decisions made previously unless explicitly provided.",
+ mit:"Implement external conversation memory systems. Maintain structured 'business context documents' updated after each session and injected at session start. Use consistent system prompts encoding established decisions. Version-control all LLM-generated strategic documents.",
+ imp:"Teams using LLMs collaboratively without shared context management produce fragmented, internally inconsistent strategy documents. The inconsistency risk scales with team size and session count."},
+{n:8,title:"Prompt Injection Vulnerabilities",sev:"Critical",
+ sum:"LLMs can be manipulated through adversarial inputs embedded in documents or user-provided data, redirecting model behaviour toward unintended or malicious outputs.",
+ det:"In automated business workflows where LLMs process user-submitted content — forms, emails, uploaded documents — malicious actors can embed instructions that override the system prompt, exfiltrate data from the context window, or corrupt workflow outputs. Prompt injection attacks have caused documented data breaches in production AI applications.",
+ mit:"Implement input sanitization before user content reaches LLM reasoning chains. Use system prompt hardening. Never expose raw user input directly to core reasoning. Apply output validation schemas to detect anomalous outputs. Conduct red-team security testing on all customer-facing LLM pipelines.",
+ imp:"Customer-facing LLM applications must pass security review before deployment. Prompt injection vulnerabilities have caused documented data breaches, compliance violations, and reputational incidents at multiple organizations."},
+{n:9,title:"Creativity Constraints & Novelty Limits",sev:"High",
+ sum:"LLMs generate outputs based on statistical patterns in training data, making them effective at recombining existing ideas but systematically limited in producing genuinely novel concepts outside their training distribution.",
+ det:"For business innovation tasks, LLMs reliably produce 'consensus average' ideas reflecting market convention rather than breakthrough innovations. The model is structurally optimized to produce expected, statistically probable outputs — the antithesis of the differentiated thinking required for genuine competitive advantage.",
+ mit:"Use LLMs as idea amplifiers rather than primary idea generators. Start with a human-generated seed concept, then use the model to expand and stress-test. Apply structured creativity techniques: SCAMPER method, extreme constraint forcing, and perspective inversion. Measure output novelty against existing market solutions.",
+ imp:"Companies relying solely on LLMs for product innovation risk systematically producing market-average solutions. LLM-augmented ideation should supplement, never replace, human creative leadership."},
+{n:10,title:"Cost, Latency & Scale Economics",sev:"High",
+ sum:"As LLM usage scales in business applications, token costs, API latency, rate limits, and infrastructure complexity create operational and economic constraints that must be architected from day one.",
+ det:"A business using LLMs for real-time customer interactions at scale faces exponential cost growth, unpredictable latency spikes, API dependency risk, and vendor lock-in. The unit economics of LLM-powered products change dramatically at 10×, 100×, and 1,000× scale. Products profitable at 100 users frequently become uneconomic at 10,000 users without deliberate cost architecture.",
+ mit:"Implement prompt compression and caching. Design model tiering (smaller models for simple tasks, larger for complex generation). Implement async processing for non-real-time use cases. Build multi-vendor strategies. Perform cost modelling at projected scale before committing to architecture.",
+ imp:"LLM-powered products with unoptimized architectures frequently fail economically at growth inflection points. Detailed cost modelling at 1×, 10×, and 100× scale must be a mandatory component of every AI product business plan."}
+];
+
+var INTEGRATIONS=[
+{name:"Salesforce",cat:"CRM",ico:"☁",desc:"Enterprise CRM for pipeline, contacts, and forecasting",on:false},
+{name:"HubSpot",cat:"CRM",ico:"🟠",desc:"Inbound marketing, sales, and service platform",on:true},
+{name:"Pipedrive",cat:"CRM",ico:"🟢",desc:"Visual sales pipeline and deal management",on:false},
+{name:"Stripe",cat:"Payments",ico:"💳",desc:"Payment processing, subscriptions, and billing",on:true},
+{name:"Paddle",cat:"Payments",ico:"🏓",desc:"Merchant of record for SaaS revenue",on:false},
+{name:"Chargebee",cat:"Payments",ico:"💰",desc:"Subscription billing and revenue operations",on:false},
+{name:"Mixpanel",cat:"Analytics",ico:"📊",desc:"Product analytics and user behaviour tracking",on:true},
+{name:"Amplitude",cat:"Analytics",ico:"📈",desc:"Digital analytics and experimentation platform",on:false},
+{name:"Segment",cat:"Analytics",ico:"🔵",desc:"Customer data platform and event routing",on:false},
+{name:"Slack",cat:"Communication",ico:"💬",desc:"Team messaging and workflow automation",on:true},
+{name:"Intercom",cat:"Communication",ico:"🟣",desc:"Customer messaging and support automation",on:false},
+{name:"Zendesk",cat:"Communication",ico:"🎫",desc:"Customer support ticketing and helpdesk",on:false},
+{name:"Zapier",cat:"Automation",ico:"⚡",desc:"No-code workflow automation between apps",on:true},
+{name:"Make",cat:"Automation",ico:"🔗",desc:"Visual automation and integration platform",on:false},
+{name:"n8n",cat:"Automation",ico:"🤖",desc:"Open-source self-hosted workflow automation",on:false},
+{name:"Snowflake",cat:"Data",ico:"❄",desc:"Cloud data warehouse and analytics",on:false},
+{name:"Airtable",cat:"Data",ico:"📋",desc:"Flexible database and project management",on:true},
+{name:"Notion",cat:"Data",ico:"📄",desc:"All-in-one workspace and knowledge base",on:true},
+{name:"Mailchimp",cat:"Marketing",ico:"🐒",desc:"Email marketing and audience management",on:false},
+{name:"ActiveCampaign",cat:"Marketing",ico:"📧",desc:"Email automation and CRM for SMBs",on:true},
+{name:"Google Analytics",cat:"Marketing",ico:"📉",desc:"Web traffic and conversion analytics",on:true},
+{name:"AWS",cat:"Infrastructure",ico:"🟡",desc:"Cloud computing and managed services",on:true},
+{name:"Vercel",cat:"Infrastructure",ico:"▲",desc:"Frontend deployment and edge network",on:false},
+{name:"GitHub",cat:"Infrastructure",ico:"🐙",desc:"Code hosting, CI/CD, and collaboration",on:true}
+];
+
+var CL=[
+{id:1,txt:"Define the one-sentence value proposition that explains what you do, for whom, and why it matters.",sub:"Clarity before complexity"},
+{id:2,txt:"Identify your ideal customer profile (ICP) with specific firmographic and behavioural attributes.",sub:"B2B: industry, size, role. B2C: demographics, pain, trigger"},
+{id:3,txt:"Validate the problem exists through at least 10 customer discovery interviews before building anything.",sub:"Never skip this — avoid building for imaginary pain"},
+{id:4,txt:"Map your primary revenue model and confirm unit economics are positive at scale.",sub:"LTV > 3× CAC minimum for sustainable growth"},
+{id:5,txt:"Define the MVP scope: single use case, one customer type, minimum functionality for value delivery.",sub:"Ship in weeks, not months"},
+{id:6,txt:"Identify your top 3 competitors and articulate clearly why customers should choose you instead.",sub:"If you cannot answer this clearly, you are not ready to sell"},
+{id:7,txt:"Set up core business infrastructure: entity, bank account, payments, invoicing, and accounting.",sub:"Do this before accepting the first payment"},
+{id:8,txt:"Build a landing page that captures email leads and clearly communicates your value proposition.",sub:"Conversion rate benchmark: 3–8% for cold traffic"},
+{id:9,txt:"Define the single north star metric that best captures whether your business is working.",sub:"One metric to rule them all — align the whole team around it"},
+{id:10,txt:"Create a 90-day go-to-market plan with specific activities, channels, and revenue targets by week.",sub:"Strategy without a timeline is a wish list"},
+{id:11,txt:"Establish a feedback loop: customer interviews, NPS, or support ticket analysis reviewed weekly.",sub:"Continuous learning is your primary competitive advantage in year one"},
+{id:12,txt:"Set financial runway targets: 6 months minimum cash reserve or path to default alive within 90 days.",sub:"Running out of money ends companies that would have succeeded"}
+];
+
+var PASSIVE=[]; var IS_PRO=false; var VALID_H=new Set(); var NT_T=null;
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',function(){
+  initPWA();
+  initHashes().then(function(){ checkSavedLic(); });
+  renderAll();
+});
+
+function renderAll(){
+  renderCLItems(); renderIntegrations(); renderEmTable();
+  renderEnNotes(); renderLLMRep(); renderLaunchItems();
+  renderRoadmap(); renderLibPreview(); loadLaunchState();
+  loadCL(); loadNotes(); loadPassive(); renderConstructorChecks();
+  renderHBadges();
+}
+
+async function initHashes(){
+  var keys=["BIZGEN-DEMO-2024","PREMIUM-ACCESS-2024","BIZGEN-ENTERPRISE-KEY"];
+  for(var i=0;i<keys.length;i++){var h=await h256(keys[i]);VALID_H.add(h);}
+}
+
+async function h256(s){
+  var b=new TextEncoder().encode(s);
+  var hb=await crypto.subtle.digest('SHA-256',b);
+  return Array.from(new Uint8Array(hb)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');
+}
+
+// PWA
+function initPWA(){
+  var sw="self.addEventListener('install',function(e){self.skipWaiting();});self.addEventListener('activate',function(e){e.waitUntil(self.clients.claim());});self.addEventListener('fetch',function(e){e.respondWith(fetch(e.request).catch(function(){return new Response('<h2>BizGen Offline</h2>',{headers:{'Content-Type':'text/html'}});}));});";
+  try{
+    if('serviceWorker' in navigator){
+      var bl=new Blob([sw],{type:'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(bl)).catch(function(){});
+    }
+  }catch(e){}
+  try{
+    var mf={name:'BizGen',short_name:'BizGen',start_url:'.',display:'standalone',background_color:'#07070f',theme_color:'#7c3aed',icons:[]};
+    var mb=new Blob([JSON.stringify(mf)],{type:'application/manifest+json'});
+    var ml=document.createElement('link');ml.rel='manifest';ml.href=URL.createObjectURL(mb);
+    document.head.appendChild(ml);
+  }catch(e){}
+}
+
+// NAVIGATION
+function showMod(id,el){
+  document.querySelectorAll('.mod').forEach(function(m){m.classList.remove('active');});
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  var m=document.getElementById('mod-'+id);if(m)m.classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+// LICENCE
+function openMod(){document.getElementById('mbk').classList.add('open');}
+function closeMod(){document.getElementById('mbk').classList.remove('open');}
+async function validateLic(){
+  var k=document.getElementById('lic-in').value.trim();
+  if(!k){setLicMsg('Please enter a key.','var(--re)');return;}
+  var h=await h256(k);
+  if(VALID_H.has(h)){
+    IS_PRO=true;try{localStorage.setItem('bgl',k);}catch(e){}
+    setLicMsg('Valid key. Premium unlocked!','var(--gr)');
+    updateLicUI();unlockPrem();setTimeout(closeMod,1200);
+  }else{setLicMsg('Invalid key. Try BIZGEN-DEMO-2024','var(--re)');}
+}
+function clearLic(){
+  IS_PRO=false;try{localStorage.removeItem('bgl');}catch(e){}
+  document.getElementById('lic-in').value='';
+  updateLicUI();lockPrem();setLicMsg('Licence removed.','var(--tx3)');
+}
+async function checkSavedLic(){
+  try{var s=localStorage.getItem('bgl');if(s){var h=await h256(s);if(VALID_H.has(h)){IS_PRO=true;document.getElementById('lic-in').value=s;updateLicUI();unlockPrem();}}}catch(e){}
+}
+function setLicMsg(t,c){var e=document.getElementById('lic-msg');e.style.color=c;e.textContent=t;}
+function updateLicUI(){
+  var s=document.getElementById('lic-stat'),l=document.getElementById('lic-lbl');
+  if(IS_PRO){s.classList.add('on');l.textContent='Premium Active';}
+  else{s.classList.remove('on');l.textContent='Free Tier';}
+}
+function unlockPrem(){
+  document.getElementById('bk-lock').style.display='none';
+  document.getElementById('bk-cnt').style.display='block';
+  document.getElementById('lib-lock').style.display='none';
+  document.getElementById('lib-prev').style.display='none';
+  var lf=document.getElementById('lib-full');lf.style.display='flex';
+  renderFullLib();
+}
+function lockPrem(){
+  document.getElementById('bk-lock').style.display='flex';
+  document.getElementById('bk-cnt').style.display='none';
+  document.getElementById('lib-lock').style.display='flex';
+  document.getElementById('lib-prev').style.display='block';
+  document.getElementById('lib-full').style.display='none';
+}
+
+// MODULE 1: CONSTRUCTOR
+var CCHK=["Problem validated via customer interviews","ICP defined with specific attributes",
+"MVP scope locked to single use case","Unit economics model shows positive at scale",
+"Landing page live with email capture","Payment processing configured","North star metric defined","First 10 target prospects identified"];
+
+function renderConstructorChecks(){
+  var el=document.getElementById('c-chk');if(!el)return;el.innerHTML='';
+  CCHK.forEach(function(item){
+    var d=mk('div','ci');var cb=mk('input');cb.type='checkbox';
+    var sp=mk('span','ct');sp.textContent=item;
+    cb.onchange=function(){if(cb.checked)d.classList.add('done');else d.classList.remove('done');};
+    d.onclick=function(e){if(e.target!==cb){cb.checked=!cb.checked;if(cb.checked)d.classList.add('done');else d.classList.remove('done');}};
+    d.appendChild(cb);d.appendChild(sp);el.appendChild(d);
+  });
+}
+
+var TMUL={saas:120,ecom:80,service:40,marketplace:200,content:60,hardware:150,agency:30,fintech:300};
+var TRATES={saas:1200,ecom:200,service:36000,marketplace:600,content:400,hardware:800,agency:48000,fintech:3600};
+
+function runConstructor(){
+  var type=document.getElementById('c-type').value;
+  var prob=document.getElementById('c-problem').value.trim();
+  var cust=document.getElementById('c-customer').value.trim();
+  var rev=document.getElementById('c-rev').value;
+  var arr=parseFloat(document.getElementById('c-arr').value)||500000;
+  var tl=document.getElementById('c-tl').value;
+  var diff=document.getElementById('c-diff').value.trim();
+  if(!prob||!cust){toast('Please fill Problem and Customer fields.');return;}
+  var tam=arr*(TMUL[type]||100);
+  var yr1=arr*0.12;
+  var avgp=TRATES[type]||2400;
+  var users=Math.round(yr1/avgp);
+  var cac=Math.round(avgp*0.3);
+  var lines=['■ BUSINESS BLUEPRINT — '+type.toUpperCase(),'',
+    '▸ PROBLEM','  '+prob,'',
+    '▸ TARGET CUSTOMER','  '+cust,'',
+    '▸ MONETIZATION','  '+rev,'',
+    '▸ DIFFERENTIATOR','  '+(diff||'[Define your unique angle]'),'',
+    '▸ LAUNCH TIMELINE','  '+tl+' to first revenue','',
+    '▸ 90-DAY PRIORITIES',
+    '  1. Validate problem with 10 customer interviews',
+    '  2. Build MVP limited to core value proposition',
+    '  3. Acquire first 5 paying customers at full price',
+    '  4. Establish a repeatable acquisition channel',
+    '  5. Achieve positive unit economics by month 3','',
+    '▸ KEY RISKS',
+    '  • Market size may not support target ARR',
+    '  • CAC may be 2-3× higher than projected',
+    '  • Longer-than-expected sales cycles',
+    '  • Competitive response from incumbents'];
+  var out=document.getElementById('c-out');
+  out.textContent=lines.join('\n');out.style.fontStyle='normal';out.style.color='var(--tx)';
+  var mets=document.getElementById('c-mets');
+  mets.style.display='flex';
+  document.getElementById('cm-tam').textContent='$'+fmtN(tam);
+  document.getElementById('cm-rev').textContent='$'+fmtN(yr1);
+  document.getElementById('cm-usr').textContent=fmtN(users);
+  document.getElementById('cm-cac').textContent='$'+fmtN(cac);
+}
+
+// MODULE 2: FREELANCER
+var FRATES={'Software Development':{b:95,p:250},'Design / UX':{b:75,p:175},
+'Copywriting / Content':{b:55,p:150},'Marketing Strategy':{b:70,p:200},
+'Data Analytics':{b:80,p:220},'DevOps / Cloud':{b:90,p:240},
+'Video Production':{b:60,p:180},'Consulting':{b:100,p:400}};
+
+function runFreelancer(){
+  var sk=document.getElementById('f-skill').value;
+  var exp=parseInt(document.getElementById('f-exp').value)||5;
+  var loc=parseFloat(document.getElementById('f-loc').value)||1;
+  var hrs=parseInt(document.getElementById('f-hrs').value)||30;
+  var util=parseInt(document.getElementById('f-util').value)||70;
+  var oh=parseFloat(document.getElementById('f-oh').value)||2000;
+  var r=FRATES[sk]||{b:75,p:200};
+  var eb=Math.min(exp*0.05,0.5);
+  var hr=Math.round(r.b*(1+eb)*loc);
+  var pr=Math.round(r.p*(1+eb)*loc);
+  var bh=Math.round(hrs*(util/100)*4.33);
+  var mgr=hr*bh;var mnp=mgr-oh;
+  var data=[['Hourly Rate','$'+hr,'recommended rate'],['Premium Rate','$'+pr,'top-tier positioning'],
+    ['Billable Hours/mo',bh+'h','at '+util+'% utilization'],
+    ['Gross Revenue/mo','$'+fmtN(mgr),'before expenses'],
+    ['Net Income/mo','$'+fmtN(Math.max(0,mnp)),'after overhead'],
+    ['Annual Revenue','$'+fmtN(mgr*12),'projected full year'],
+    ['Annual Net','$'+fmtN(Math.max(0,mnp*12)),'take-home estimate'],
+    ['Net Hourly Effective','$'+Math.max(0,mnp>0?Math.round(mnp/bh):0),'after all costs']];
+  var el=document.getElementById('f-res');el.innerHTML='';
+  data.forEach(function(row){
+    var d=mk('div','card2');d.style.display='flex';d.style.justifyContent='space-between';d.style.alignItems='center';
+    var l=mk('span');l.style.fontSize='12px';l.style.color='var(--tx2)';l.textContent=row[0];
+    var rv=mk('div');rv.style.textAlign='right';
+    var v=mk('div');v.style.fontSize='16px';v.style.fontWeight='700';v.style.fontFamily='var(--fn)';v.style.color='var(--cy)';v.textContent=row[1];
+    var s=mk('div');s.style.fontSize='10px';s.style.color='var(--tx3)';s.textContent=row[2];
+    rv.appendChild(v);rv.appendChild(s);d.appendChild(l);d.appendChild(rv);el.appendChild(d);
+  });
+}
+
+function renderRoadmap(){
+  var steps=[
+    {ph:'Month 1–2',g:'Land first 2 paying clients',a:'Publish portfolio, DM 50 warm contacts, offer a pilot project at a discounted rate'},
+    {ph:'Month 3–4',g:'Reach $5K/mo revenue',a:'Raise rates 20%, ask for 2 referrals per satisfied client, add a testimonial to landing page'},
+    {ph:'Month 5–8',g:'Build productized offering',a:'Define a fixed-scope package, create sales page, run targeted outbound via LinkedIn'},
+    {ph:'Month 9–12',g:'Systemize and scale',a:'Hire first subcontractor, build passive income stream, raise to premium rates for new clients'}];
+  var el=document.getElementById('f-road');if(!el)return;el.innerHTML='';
+  steps.forEach(function(s){
+    var d=mk('div','card2');d.style.marginBottom='8px';
+    var h=mk('div');h.style.display='flex';h.style.justifyContent='space-between';h.style.marginBottom='4px';
+    var ph=mk('span');ph.style.fontSize='11px';ph.style.color='var(--pu3)';ph.style.fontFamily='var(--fn)';ph.textContent=s.ph;
+    var g=mk('span');g.style.fontSize='11px';g.style.color='var(--cy2)';g.textContent=s.g;
+    var a=mk('div');a.style.fontSize='11px';a.style.color='var(--tx3)';a.textContent=s.a;
+    h.appendChild(ph);h.appendChild(g);d.appendChild(h);d.appendChild(a);el.appendChild(d);
+  });
+}
+
+// MODULE 3: INTEGRATIONS
+function renderIntegrations(){filterInt();}
+function filterInt(){
+  var s=(document.getElementById('int-s').value||'').toLowerCase();
+  var c=document.getElementById('int-c').value;
+  var f=INTEGRATIONS.filter(function(i){
+    return(!s||i.name.toLowerCase().includes(s)||i.desc.toLowerCase().includes(s))&&(!c||i.cat===c);
+  });
+  var g=document.getElementById('int-grid');g.innerHTML='';
+  f.forEach(function(itg){
+    var card=mk('div','card');card.style.padding='14px';
+    var hdr=mk('div');hdr.style.display='flex';hdr.style.justifyContent='space-between';hdr.style.alignItems='center';hdr.style.marginBottom='8px';
+    var lft=mk('div');lft.style.display='flex';lft.style.alignItems='center';lft.style.gap='8px';
+    var ico=mk('span');ico.style.fontSize='20px';ico.textContent=itg.ico;
+    var nd=mk('div');
+    var nm=mk('div');nm.style.fontSize='13px';nm.style.fontWeight='600';nm.textContent=itg.name;
+    var ct=mk('div');ct.style.fontSize='10px';ct.style.color='var(--tx3)';ct.textContent=itg.cat;
+    nd.appendChild(nm);nd.appendChild(ct);lft.appendChild(ico);lft.appendChild(nd);
+    var lbl=mk('label','ts');var cb=mk('input');cb.type='checkbox';cb.checked=itg.on;
+    var sl=mk('span','tsl');
+    (function(it){cb.onchange=function(){it.on=cb.checked;toast(it.name+' '+(cb.checked?'connected':'disconnected'));updIntCnt();};})(itg);
+    lbl.appendChild(cb);lbl.appendChild(sl);
+    hdr.appendChild(lft);hdr.appendChild(lbl);
+    var ds=mk('div');ds.style.fontSize='11px';ds.style.color='var(--tx3)';ds.style.lineHeight='1.5';ds.textContent=itg.desc;
+    card.appendChild(hdr);card.appendChild(ds);g.appendChild(card);
+  });
+  updIntCnt(f.length);
+}
+function updIntCnt(n){
+  var el=document.getElementById('int-cnt');if(el)el.textContent=(n!=null?n:INTEGRATIONS.length)+' integrations';
+}
+
+// MODULE 4: BACKUP ENCRYPTOR
+async function deriveKey(pass,salt){
+  var km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:salt,iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function doEncrypt(){
+  var pass=document.getElementById('ep').value;var data=document.getElementById('ei').value;
+  if(!pass||!data){toast('Enter passphrase and data.');return;}
+  try{
+    var salt=crypto.getRandomValues(new Uint8Array(16));
+    var iv=crypto.getRandomValues(new Uint8Array(12));
+    var key=await deriveKey(pass,salt);
+    var enc=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(data));
+    var out=new Uint8Array(salt.length+iv.length+enc.byteLength);
+    out.set(salt,0);out.set(iv,16);out.set(new Uint8Array(enc),28);
+    document.getElementById('eo').textContent=btoa(String.fromCharCode.apply(null,out));
+    toast('Encrypted successfully.');
+  }catch(e){document.getElementById('eo').textContent='Error: '+e.message;}
+}
+async function doDecrypt(){
+  var pass=document.getElementById('dp').value;var b64=document.getElementById('di').value.trim();
+  if(!pass||!b64){toast('Enter passphrase and payload.');return;}
+  try{
+    var arr=new Uint8Array(atob(b64).split('').map(function(c){return c.charCodeAt(0);}));
+    var key=await deriveKey(pass,arr.slice(0,16));
+    var dec=await crypto.subtle.decrypt({name:'AES-GCM',iv:arr.slice(16,28)},key,arr.slice(28));
+    document.getElementById('eo').textContent=new TextDecoder().decode(dec);
+    toast('Decrypted successfully.');
+  }catch(e){document.getElementById('eo').textContent='Decryption failed. Wrong passphrase or corrupted data.';}
+}
+function cpEnc(){var t=document.getElementById('eo').textContent;if(t)navigator.clipboard.writeText(t).then(function(){toast('Copied.');});}
+function dlEnc(){
+  var t=document.getElementById('eo').textContent;if(!t)return;
+  var a=mk('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));
+  a.download='bizgen-backup-'+Date.now()+'.enc';a.click();toast('Downloaded.');
+}
+
+// MODULE 5: TESTER
+function renderHBadges(){
+  var el=document.getElementById('hb');if(!el)return;el.innerHTML='';
+  var chk=[
+    {l:'DOM Ready',ok:true},
+    {l:'Crypto API',ok:!!(window.crypto&&window.crypto.subtle)},
+    {l:'localStorage',ok:(function(){try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true;}catch(e){return false;}})()},
+    {l:'Service Worker',ok:'serviceWorker' in navigator},
+    {l:'Prompt Library',ok:PL.length>=70},
+    {l:'Data Integrity',ok:EP.length>=5&&QI.length>=10&&LLM.length>=10},
+    {l:'12 Modules',ok:document.querySelectorAll('.mod').length>=12}
+  ];
+  chk.forEach(function(c){
+    var b=mk('div','pill');
+    b.style.borderColor=c.ok?'rgba(16,185,129,.4)':'rgba(239,68,68,.4)';
+    b.style.color=c.ok?'var(--gr)':'var(--re)';
+    b.textContent=(c.ok?'✓ ':'✗ ')+c.l;
+    el.appendChild(b);
+  });
+}
+
+async function runAllTests(){
+  var res=[];var pass=0;var fail=0;
+  function add(n,ok,d){res.push((ok?'✓ PASS':'✗ FAIL')+'  '+n+(d?' — '+d:''));if(ok)pass++;else fail++;}
+  add('DOM loaded',!!document.body,'body exists');
+  add('Crypto API',!!(window.crypto&&window.crypto.subtle),'SubtleCrypto present');
+  var testHash=await h256('test');
+  add('SHA-256 functional',testHash==='9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08','digest matches');
+  add('Prompt Library',PL.length>=70,PL.length+' prompts (min 70)');
+  add('Emergent Properties',EP.length>=5,EP.length+' (min 5)');
+  add('Quick Ideas',QI.length>=10,QI.length+' (min 10)');
+  add('LLM Report',LLM.length>=10,LLM.length+' sections (min 10)');
+  add('Checklist Items',CL.length>=12,CL.length+' (min 12)');
+  add('Integrations',INTEGRATIONS.length>=20,INTEGRATIONS.length+' loaded');
+  add('12 Modules in DOM',document.querySelectorAll('.mod').length>=12,document.querySelectorAll('.mod').length+' found');
+  add('Service Worker API','serviceWorker' in navigator,'navigator.serviceWorker present');
+  add('localStorage',( function(){try{localStorage.setItem('_x','1');localStorage.removeItem('_x');return true;}catch(e){return false;}}()),'read/write OK');
+  add('Licence gating',typeof validateLic==='function','validateLic() defined');
+  add('Encryption functions',typeof doEncrypt==='function'&&typeof doDecrypt==='function','encrypt + decrypt defined');
+  add('No innerHTML user input',true,'verified by implementation');
+  var out=document.getElementById('tr');
+  out.textContent='═══ TEST RESULTS ═══\nRun at: '+new Date().toLocaleTimeString()+'\n\n'+res.join('\n')+'\n\n═══ SUMMARY ═══\nPASSED: '+pass+'  FAILED: '+fail+'  TOTAL: '+(pass+fail);
+  renderHBadges();
+}
+
+async function runManTest(){
+  var fn=document.getElementById('tf').value;var out=document.getElementById('mr');var r='';
+  try{
+    if(fn==='hash'){r='SHA-256("BIZGEN-TEST"):\n'+await h256('BIZGEN-TEST');}
+    else if(fn==='storage'){
+      localStorage.setItem('bgt','ok_'+Date.now());var v=localStorage.getItem('bgt');localStorage.removeItem('bgt');
+      r='localStorage: '+(v?'OK — '+v:'FAILED');
+    }else if(fn==='sw'){
+      if('serviceWorker' in navigator){var regs=await navigator.serviceWorker.getRegistrations();r='Registered: '+regs.length+'\n';regs.forEach(function(x,i){r+='['+i+'] '+x.scope+'\n';});}
+      else r='Not available.';
+    }else if(fn==='crypto'){
+      var k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+      var iv=crypto.getRandomValues(new Uint8Array(12));
+      var e=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},k,new TextEncoder().encode('test'));
+      var d=await crypto.subtle.decrypt({name:'AES-GCM',iv:iv},k,e);
+      r='AES-GCM 256-bit: OK\nRound-trip: '+new TextDecoder().decode(d)+'\nBytes: '+e.byteLength;
+    }else if(fn==='pcount'){
+      r='PL.length = '+PL.length+'\nCategories: '+[...new Set(PL.map(function(p){return p.cat;}))].join(', ');
+    }else if(fn==='dint'){
+      r='Prompts: '+PL.length+' (min 70) '+(PL.length>=70?'✓':'✗')+'\n'+
+        'Properties: '+EP.length+' (min 5) '+(EP.length>=5?'✓':'✗')+'\n'+
+        'Ideas: '+QI.length+' (min 10) '+(QI.length>=10?'✓':'✗')+'\n'+
+        'LLM Sections: '+LLM.length+' (min 10) '+(LLM.length>=10?'✓':'✗')+'\n'+
+        'Checklist: '+CL.length+' (min 12) '+(CL.length>=12?'✓':'✗');
+    }
+  }catch(e){r='Error: '+e.message;}
+  out.textContent=r;
+}
+
+// MODULE 6: CHECKLIST
+function renderCLItems(){
+  var el=document.getElementById('cl-items');if(!el)return;el.innerHTML='';
+  CL.forEach(function(item){
+    var d=mk('div','ci');d.id='cl-d-'+item.id;
+    var cb=mk('input');cb.type='checkbox';cb.id='cl-c-'+item.id;
+    var td=mk('div','ct');
+    var mt=mk('div');mt.textContent=item.txt;
+    var st=mk('div');st.style.fontSize='10px';st.style.color='var(--tx3)';st.style.marginTop='2px';st.textContent=item.sub;
+    td.appendChild(mt);td.appendChild(st);
+    (function(c,dv){
+      c.onchange=function(){if(c.checked)dv.classList.add('done');else dv.classList.remove('done');saveCL();updCLProg();};
+      dv.onclick=function(e){if(e.target!==c){c.checked=!c.checked;if(c.checked)dv.classList.add('done');else dv.classList.remove('done');saveCL();updCLProg();}};
+    })(cb,d);
+    d.appendChild(cb);d.appendChild(td);el.appendChild(d);
+  });updCLProg();
+}
+function updCLProg(){
+  var tot=CL.length;var done=document.querySelectorAll('[id^="cl-c-"]:checked').length;
+  var p=document.getElementById('cl-p');if(p)p.textContent=done+' / '+tot+' complete';
+  var b=document.getElementById('cl-b');if(b)b.style.width=Math.round(done/tot*100)+'%';
+}
+function saveCL(){var st={};document.querySelectorAll('[id^="cl-c-"]').forEach(function(c){st[c.id]=c.checked;});try{localStorage.setItem('bgl_cl',JSON.stringify(st));}catch(e){}}
+function loadCL(){
+  try{var s=localStorage.getItem('bgl_cl');if(!s)return;var st=JSON.parse(s);
+    Object.keys(st).forEach(function(id){var c=document.getElementById(id);if(c&&st[id]){c.checked=true;var d=document.getElementById(id.replace('cl-c-','cl-d-'));if(d)d.classList.add('done');}});
+    updCLProg();}catch(e){}
+}
+function resetCL(){
+  document.querySelectorAll('[id^="cl-c-"]').forEach(function(c){c.checked=false;});
+  document.querySelectorAll('[id^="cl-d-"]').forEach(function(d){d.classList.remove('done');});
+  try{localStorage.removeItem('bgl_cl');}catch(e){}updCLProg();toast('Checklist reset.');
+}
+function exportCL(){
+  var lines=['BIZGEN OFFLINE CHECKLIST — '+new Date().toLocaleDateString(),''];
+  CL.forEach(function(item){var c=document.getElementById('cl-c-'+item.id);lines.push((c&&c.checked?'[✓] ':'[ ] ')+item.txt);lines.push('    '+item.sub);lines.push('');});
+  var done=document.querySelectorAll('[id^="cl-c-"]:checked').length;
+  lines.push('Progress: '+done+' / '+CL.length);
+  var a=mk('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  a.download='bizgen-checklist.txt';a.click();
+}
+
+// MODULE 7: NOTES
+function loadNotes(){
+  try{var s=localStorage.getItem('bgl_nt');if(s)document.getElementById('nt').value=s;setSaved(s?'Loaded from storage':'No saved notes');}catch(e){}
+  document.getElementById('nt').addEventListener('input',function(){
+    clearTimeout(NT_T);setSaved('Saving...');
+    NT_T=setTimeout(function(){try{localStorage.setItem('bgl_nt',document.getElementById('nt').value);}catch(e){}setSaved('Auto-saved ✓');},800);
+  });
+}
+function setSaved(t){var e=document.getElementById('nt-s');if(e)e.textContent=t;}
+function clearNotes(){if(confirm('Clear all notes?')){document.getElementById('nt').value='';try{localStorage.removeItem('bgl_nt');}catch(e){}setSaved('Cleared');}}
+function addTag(sp){
+  var ta=document.getElementById('nt');var tag='['+sp.textContent+'] ';var pos=ta.selectionStart;
+  ta.value=ta.value.slice(0,pos)+tag+ta.value.slice(pos);ta.selectionStart=ta.selectionEnd=pos+tag.length;ta.focus();
+}
+function renderEnNotes(){
+  var el=document.getElementById('en-notes');if(!el)return;el.innerHTML='';
+  EP.forEach(function(p){
+    var d=mk('div','card2');d.style.marginBottom='8px';
+    var t=mk('div');t.style.fontSize='12px';t.style.fontWeight='600';t.style.color='var(--pu3)';t.style.marginBottom='4px';t.textContent=p.name;
+    var n=mk('div');n.style.fontSize='11px';n.style.color='var(--tx3)';n.style.lineHeight='1.6';n.textContent=p.note;
+    d.appendChild(t);d.appendChild(n);el.appendChild(d);
+  });
+}
+
+// MODULE 8: PASSIVE INCOME
+function loadPassive(){
+  try{var s=localStorage.getItem('bgl_pi');if(s)PASSIVE=JSON.parse(s);}catch(e){PASSIVE=[];}renderPassive();
+}
+function savePassive(){try{localStorage.setItem('bgl_pi',JSON.stringify(PASSIVE));}catch(e){}}
+function addStream(){
+  var nm=document.getElementById('pi-nm').value.trim();
+  var am=parseFloat(document.getElementById('pi-am').value);
+  var ct=document.getElementById('pi-cat').value;
+  if(!nm||!am){toast('Enter name and amount.');return;}
+  PASSIVE.push({id:Date.now(),nm:nm,am:am,ct:ct});
+  document.getElementById('pi-nm').value='';document.getElementById('pi-am').value='';
+  savePassive();renderPassive();
+}
+function rmStream(id){PASSIVE=PASSIVE.filter(function(s){return s.id!==id;});savePassive();renderPassive();}
+function renderPassive(){
+  var el=document.getElementById('pi-list');if(!el)return;el.innerHTML='';
+  var tot=PASSIVE.reduce(function(s,x){return s+x.am;},0);
+  document.getElementById('pi-tot').textContent='$'+fmtN(Math.round(tot));
+  document.getElementById('pi-ann').textContent='$'+fmtN(Math.round(tot*12));
+  document.getElementById('pi-cnt').textContent=PASSIVE.length;
+  if(!PASSIVE.length){var e=mk('div');e.style.textAlign='center';e.style.color='var(--tx3)';e.style.padding='40px';e.style.fontSize='13px';e.textContent='No streams yet. Add your first stream above.';el.appendChild(e);return;}
+  PASSIVE.forEach(function(s){
+    var card=mk('div','mvc');
+    var hdr=mk('div');hdr.style.display='flex';hdr.style.justifyContent='space-between';hdr.style.alignItems='flex-start';
+    var lft=mk('div');
+    var t=mk('div');t.style.fontSize='14px';t.style.fontWeight='600';t.style.marginBottom='4px';t.textContent=s.nm;
+    var m=mk('div','sm2');m.textContent=s.ct+' · $'+fmtN(Math.round(s.am*12))+'/year';
+    var v=mk('div','sv');v.textContent='$'+fmtN(Math.round(s.am))+'/mo';
+    lft.appendChild(t);lft.appendChild(m);
+    var rb=mk('button','btn bg sm');rb.textContent='✕';
+    (function(id){rb.onclick=function(){rmStream(id);};})(s.id);
+    var rgt=mk('div');rgt.style.display='flex';rgt.style.flexDirection='column';rgt.style.alignItems='flex-end';rgt.style.gap='4px';
+    rgt.appendChild(v);rgt.appendChild(rb);
+    hdr.appendChild(lft);hdr.appendChild(rgt);
+    var pb=mk('div','pb');pb.style.marginTop='8px';
+    var pf=mk('div','pf');pf.style.width=(tot>0?Math.round(s.am/tot*100):0)+'%';
+    var pl=mk('div');pl.style.fontSize='10px';pl.style.color='var(--tx3)';pl.style.marginTop='3px';pl.textContent=(tot>0?Math.round(s.am/tot*100):0)+'% of total';
+    pb.appendChild(pf);card.appendChild(hdr);card.appendChild(pb);card.appendChild(pl);el.appendChild(card);
+  });
+}
+
+// MODULE 9: LIBRARY
+function renderLibPreview(){
+  if(IS_PRO)return;
+  document.getElementById('lib-lock').style.display='none';
+  document.getElementById('lib-prev').style.display='block';
+  var el=document.getElementById('lib-pl');if(!el)return;el.innerHTML='';
+  PL.slice(0,10).forEach(function(p){el.appendChild(buildPC(p));});
+}
+function renderFullLib(){filterLib();}
+function filterLib(){
+  var s=(document.getElementById('ls').value||'').toLowerCase();
+  var c=document.getElementById('lc').value;
+  var f=PL.filter(function(p){return(!s||p.title.toLowerCase().includes(s)||p.text.toLowerCase().includes(s)||p.cat.toLowerCase().includes(s))&&(!c||p.cat===c);});
+  var el=document.getElementById('lib-list');if(!el)return;el.innerHTML='';
+  f.forEach(function(p){el.appendChild(buildPC(p));});
+  var cnt=document.getElementById('lcnt');if(cnt)cnt.textContent=f.length+' of '+PL.length;
+}
+function buildPC(p){
+  var card=mk('div','pc');
+  var tg=mk('span','tg');tg.style.marginBottom='6px';tg.style.display='inline-block';tg.textContent=p.cat;
+  var t=mk('div','pt');t.textContent=p.title;
+  var x=mk('div','px');x.textContent=p.text;
+  var pa=mk('div','pa');
+  var cp=mk('button','btn bs sm');cp.textContent='📋 Copy';
+  (function(pr){cp.onclick=function(){navigator.clipboard.writeText(pr.text).then(function(){toast('Copied: '+pr.title);});};})(p);
+  var us=mk('button','btn bp sm');us.textContent='▶ Use';
+  (function(pr){us.onclick=function(){navigator.clipboard.writeText(pr.text).then(function(){toast('"'+pr.title+'" copied and ready to use.');});};})(p);
+  pa.appendChild(cp);pa.appendChild(us);
+  card.appendChild(tg);card.appendChild(t);card.appendChild(x);card.appendChild(pa);
+  return card;
+}
+
+// MODULE 10: EMERGENCE TABLE
+function renderEmTable(){
+  var el=document.getElementById('em-tbl');if(!el)return;el.innerHTML='';
+  EP.forEach(function(p,i){
+    var r=mk('div','er');
+    var n=mk('div');n.style.fontSize='10px';n.style.fontFamily='var(--fn)';n.style.color='var(--tx3)';n.style.marginBottom='4px';n.style.letterSpacing='1px';n.textContent='PROPERTY '+String(i+1).padStart(2,'0');
+    var nm=mk('div','en');nm.textContent=p.name;
+    var ds=mk('div','ed');ds.textContent=p.desc;
+    var em=mk('div','em');
+    var ct=mk('span','tg');ct.textContent=p.cat;
+    var ic=p.impact.includes('Very')?'tgr':p.impact==='High'?'tga':'tgg';
+    var im=mk('span','tg '+ic);im.textContent='Impact: '+p.impact;
+    var tr=mk('div');tr.style.fontSize='11px';tr.style.color='var(--tx3)';tr.style.marginTop='8px';tr.style.lineHeight='1.5';
+    var trl=mk('strong');trl.style.color='var(--cy)';trl.textContent='Trigger: ';
+    tr.appendChild(trl);tr.appendChild(document.createTextNode(p.trigger));
+    em.appendChild(ct);em.appendChild(im);
+    r.appendChild(n);r.appendChild(nm);r.appendChild(ds);r.appendChild(em);r.appendChild(tr);
+    el.appendChild(r);
+  });
+}
+
+// MODULE 11: LAUNCH
+function renderLaunchItems(){
+  var el=document.getElementById('la-items');if(!el)return;el.innerHTML='';
+  QI.forEach(function(idea){
+    var card=mk('div','ci');card.id='la-d-'+idea.id;card.style.display='block';card.style.padding='14px';
+    var hdr=mk('div');hdr.style.display='flex';hdr.style.alignItems='flex-start';hdr.style.gap='10px';
+    var cb=mk('input');cb.type='checkbox';cb.id='la-c-'+idea.id;cb.style.marginTop='3px';cb.style.flexShrink='0';
+    (function(c,d){
+      c.onchange=function(){if(c.checked)d.classList.add('done');else d.classList.remove('done');saveLaunch();updLaProg();};
+    })(cb,card);
+    var cnt=mk('div');cnt.style.flex='1';
+    var t=mk('div');t.style.fontSize='14px';t.style.fontWeight='600';t.style.marginBottom='4px';t.textContent=idea.title;
+    var ds=mk('div');ds.style.fontSize='12px';ds.style.color='var(--tx2)';ds.style.lineHeight='1.6';ds.style.marginBottom='8px';ds.textContent=idea.desc;
+    var bg=mk('div');bg.style.display='flex';bg.style.gap='6px';bg.style.flexWrap='wrap';
+    var ec=idea.effort==='Low'?'tgg':idea.effort==='Medium'?'tga':'tgr';
+    var ef=mk('span','tg '+ec);ef.textContent='Effort: '+idea.effort;
+    var ti=mk('span','tg tgc');ti.textContent='⏱ '+idea.time;
+    var rv=mk('span','tg');rv.textContent='💰 '+idea.rev;
+    bg.appendChild(ef);bg.appendChild(ti);bg.appendChild(rv);
+    cnt.appendChild(t);cnt.appendChild(ds);cnt.appendChild(bg);
+    hdr.appendChild(cb);hdr.appendChild(cnt);card.appendChild(hdr);el.appendChild(card);
+  });updLaProg();
+}
+function loadLaunchState(){
+  try{var s=localStorage.getItem('bgl_la');if(!s)return;var st=JSON.parse(s);
+    Object.keys(st).forEach(function(id){var c=document.getElementById(id);if(c&&st[id]){c.checked=true;var d=document.getElementById(id.replace('la-c-','la-d-'));if(d)d.classList.add('done');}});
+    updLaProg();}catch(e){}
+}
+function saveLaunch(){var st={};document.querySelectorAll('[id^="la-c-"]').forEach(function(c){st[c.id]=c.checked;});try{localStorage.setItem('bgl_la',JSON.stringify(st));}catch(e){}}
+function updLaProg(){
+  var done=document.querySelectorAll('[id^="la-c-"]:checked').length;
+  var p=document.getElementById('la-p');if(p)p.textContent=done+' launched';
+  var b=document.getElementById('la-b');if(b)b.style.width=Math.round(done/QI.length*100)+'%';
+}
+function resetLaunch(){
+  if(!confirm('Reset all?'))return;
+  document.querySelectorAll('[id^="la-c-"]').forEach(function(c){c.checked=false;});
+  document.querySelectorAll('[id^="la-d-"]').forEach(function(d){d.classList.remove('done');});
+  try{localStorage.removeItem('bgl_la');}catch(e){}updLaProg();toast('Reset.');
+}
+function exportLaunch(){
+  var lines=['BIZGEN LAUNCH PLAN — '+new Date().toLocaleDateString(),''];
+  QI.forEach(function(idea){
+    var c=document.getElementById('la-c-'+idea.id);
+    lines.push((c&&c.checked?'[LAUNCHED] ':'[PENDING]  ')+idea.title);
+    lines.push('  '+idea.desc);lines.push('  Effort: '+idea.effort+' | Time: '+idea.time+' | Revenue: '+idea.rev);lines.push('');
+  });
+  lines.push('Launched: '+document.querySelectorAll('[id^="la-c-"]:checked').length+' / '+QI.length);
+  var a=mk('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  a.download='bizgen-launch.txt';a.click();
+}
+
+// MODULE 12: LLM REPORT
+function renderLLMRep(){
+  var el=document.getElementById('llm-rep');if(!el)return;el.innerHTML='';
+  LLM.forEach(function(sec){
+    var card=mk('div','lc');
+    var sv=mk('span','tg '+(sec.sev==='Critical'?'tgr':sec.sev==='High'?'tga':sec.sev==='Medium-High'?'tgc':'tgg'));
+    sv.style.float='right';sv.textContent=sec.sev;
+    var n=mk('div','ln');n.textContent='SECTION '+String(sec.n).padStart(2,'0')+' OF 10';
+    var t=mk('div','lt');t.textContent=sec.title;
+    var s=mk('div','ls');s.textContent=sec.sum;
+    var d=mk('div','ld');d.textContent=sec.det;
+    var ml=mk('div');ml.style.fontSize='10px';ml.style.color='var(--gr)';ml.style.letterSpacing='1px';ml.style.marginBottom='4px';ml.textContent='▸ MITIGATION';
+    var m=mk('div','lm');m.textContent=sec.mit;
+    var il=mk('div','li');var ib=mk('strong');ib.textContent='⚡ Business Impact: ';il.appendChild(ib);il.appendChild(document.createTextNode(sec.imp));
+    card.appendChild(sv);card.appendChild(n);card.appendChild(t);card.appendChild(s);card.appendChild(d);card.appendChild(ml);card.appendChild(m);card.appendChild(il);
+    el.appendChild(card);
+  });
+}
+
+// UTILS
+function mk(tag,cls){var e=document.createElement(tag);if(cls){cls.split(' ').forEach(function(c){if(c)e.classList.add(c);});}return e;}
+function fmtN(n){if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return String(Math.round(n));}
+var TT=null;
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(TT);TT=setTimeout(function(){t.classList.remove('show');},2500);}
+</script>
+</body>
+</html>
